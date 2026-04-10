@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Calendar, Clock, ExternalLink } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Calendar, Clock, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 
 export default function Blogs() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     async function fetchBlogs() {
@@ -30,21 +31,21 @@ export default function Blogs() {
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
+  const visibleBlogs = showAll ? blogs : blogs.slice(0, 3);
+
   if (loading) {
     return (
-      <section id="blogs" className="py-24 px-6 max-w-[900px] mx-auto min-h-[50vh] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
+      <section id="blogs" className="py-24 px-6 max-w-7xl mx-auto min-h-[50vh] flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-400 font-medium animate-pulse">Loading blog posts...</p>
       </section>
     );
   }
 
-  // Dont render section at all if there are no blogs
-  if (blogs.length === 0) {
-    return null; 
-  }
+  if (blogs.length === 0) return null; 
 
   return (
-    <section id="blogs" className="py-24 px-6 max-w-[1400px] mx-auto min-h-screen">
+    <section id="blogs" className="py-24 px-6 max-w-7xl mx-auto">
       <motion.div 
         className="text-center mb-16"
         initial={{ opacity: 0, y: 20 }}
@@ -54,70 +55,77 @@ export default function Blogs() {
         <h2 className="text-4xl md:text-5xl font-bold mb-4">
           My <span className="text-purple-400">Blogs</span> and <span className="text-purple-400">Writing</span>
         </h2>
-        <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-          Sharing my thoughts, experiences, and insights from my journey as a software engineer and student. Read about challenges, learnings, ai engineering stuff, and the exciting world of technology.
+        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+          Sharing my technical insights, project breakdowns, and thoughts on AI and software engineering.
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-        {blogs.map((blog, index) => (
-          <motion.div 
-            key={blog._id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="flex flex-col h-full bg-[#0f121b] border border-slate-800 p-8 md:p-10 rounded-2xl shadow-xl hover:border-purple-500/30 transition-colors group"
-          >
-            {/* Metadata row */}
-            <div className="flex items-center gap-3 text-sm font-medium text-slate-400 mb-5">
-              <div className="flex items-center gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+        <AnimatePresence mode="popLayout">
+          {visibleBlogs.map((blog, index) => (
+            <motion.div 
+              key={blog._id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="flex flex-col bg-[#0f121b] border border-slate-800 p-8 rounded-3xl hover:border-purple-500/50 transition-all group h-full shadow-xl"
+            >
+              <div className="flex items-center gap-3 text-sm text-slate-400 mb-6">
                 <Calendar size={16} />
                 <span>{formatDate(blog.createdAt)}</span>
-              </div>
-              <span className="text-slate-500">•</span>
-              <div className="flex items-center gap-2">
+                <span className="text-slate-500">•</span>
                 <Clock size={16} />
                 <span>{blog.readTime}</span>
               </div>
-            </div>
 
-            {/* Title & Preview Content */}
-            <div className="flex-grow">
-              <h3 className="text-3xl font-extrabold text-white mb-4">
-                {blog.title}
-              </h3>
-              <p className="text-[#a0a5b1] text-base leading-relaxed mb-8 line-clamp-4">
-                {blog.content}
-              </p>
-            </div>
-
-            {/* Tags array */}
-            {blog.tags && blog.tags.length > 0 && (
-              <div className="flex flex-wrap gap-3 mb-8 text-sm">
-                {blog.tags.map((tag, tIdx) => (
-                  <span 
-                    key={tIdx} 
-                    className="px-4 py-1.5 rounded-full bg-[#1e1a38] text-[#8e85f5] font-medium"
-                  >
-                    {tag}
-                  </span>
-                ))}
+              <div className="flex-grow">
+                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-purple-400 transition-colors line-clamp-2">
+                  {blog.title}
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-6 line-clamp-4">
+                  {blog.content}
+                </p>
               </div>
-            )}
 
-            {/* Read Button */}
-            <div>
+              {blog.tags && blog.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-8 lowercase">
+                  {blog.tags.map((tag, tIdx) => (
+                    <span key={tIdx} className="text-slate-500 text-xs">#{tag}</span>
+                  ))}
+                </div>
+              )}
+
               <Link 
                 href={`/blog/${blog._id}`} 
-                className="inline-flex items-center justify-center gap-2 bg-[#7e5cff] hover:bg-[#6c4be0] text-white font-bold py-3 px-8 rounded-lg text-sm transition-all shadow-[0_0_20px_rgba(126,92,255,0.4)]"
+                className="inline-flex items-center justify-center gap-2 w-full bg-[#7e5cff] hover:bg-[#6c4be0] text-white font-bold py-3.5 px-6 rounded-2xl text-sm transition-all"
               >
-                <ExternalLink size={18} /> Read Full Article
+                Read Article <ExternalLink size={16} />
               </Link>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
+
+      {blogs.length > 3 && (
+        <motion.div 
+          className="mt-16 flex justify-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+        >
+          <button 
+            onClick={() => setShowAll(!showAll)}
+            className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all active:scale-95"
+          >
+            {showAll ? (
+              <>Show Less <ChevronUp size={20} className="text-purple-400" /></>
+            ) : (
+              <>Load More Articles <ChevronDown size={20} className="text-cyan-400" /></>
+            )}
+          </button>
+        </motion.div>
+      )}
     </section>
   );
 }

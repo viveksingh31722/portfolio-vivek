@@ -1,6 +1,7 @@
 "use client";
-import { motion } from "framer-motion";
-import { Code2, Server, Database, Cloud, Wrench, BrainCircuit, MonitorSmartphone } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Code2, Server, Database, Cloud, Wrench, BrainCircuit, MonitorSmartphone, ChevronDown, ChevronUp } from "lucide-react";
 
 // Using official Devicon URLs for perfectly colored, authentic technology logos
 const skillCategories = [
@@ -71,6 +72,8 @@ const skillCategories = [
 ];
 
 export default function Skills() {
+  const [showAll, setShowAll] = useState(false);
+
   const container = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -96,7 +99,8 @@ export default function Skills() {
       </motion.div>
 
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+        layout
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         variants={container}
         initial="hidden"
         whileInView="show"
@@ -106,7 +110,8 @@ export default function Skills() {
           <motion.div 
             key={index}
             variants={item}
-            className="bg-[#0B1120] border border-slate-800/80 p-6 sm:p-8 rounded-3xl hover:border-cyan-500/50 transition-all duration-500 shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] md:opacity-50 hover:opacity-100 group flex flex-col"
+            layout
+            className={`bg-[#0B1120] border border-slate-800/80 p-6 sm:p-8 rounded-3xl hover:border-cyan-500/50 transition-all duration-500 shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] group flex flex-col ${!showAll && index >= 3 ? 'hidden md:flex' : 'flex'}`}
           >
             {/* Card Header */}
             <div className="flex items-center gap-4 mb-8">
@@ -120,17 +125,15 @@ export default function Skills() {
             <div className="flex flex-col gap-5">
               {category.skills.map((skill, sIdx) => (
                 <div key={sIdx} className="flex items-center gap-4 group/item hover:translate-x-2 transition-transform duration-300">
-                  {/* Technology Logo loaded dynamically */}
                   <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-white/5 rounded-full p-2 border border-white/5 group-hover/item:border-cyan-500/30 transition-colors overflow-hidden">
                     <img 
                       src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${skill.iconPath}`} 
                       alt={`${skill.name} logo`} 
                       className="w-full h-full object-contain filter grayscale group-hover/item:grayscale-0 transition-all duration-500"
-                      onError={(e) => { e.target.style.display = 'none' }} // Hide broken icons gracefully
+                      onError={(e) => { e.target.style.display = 'none' }}
                     />
                   </div>
 
-                  {/* Text and Badge */}
                   <div className="flex flex-col flex-grow">
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-slate-200 group-hover/item:text-cyan-400 transition-colors">{skill.name}</span>
@@ -146,6 +149,20 @@ export default function Skills() {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* View More Button for Mobile */}
+      <div className="mt-12 flex justify-center md:hidden">
+        <button 
+          onClick={() => setShowAll(!showAll)}
+          className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all group active:scale-95"
+        >
+          {showAll ? (
+            <>Show Less <ChevronUp size={20} className="text-cyan-400" /></>
+          ) : (
+            <>View All Skills <ChevronDown size={20} className="text-secondary" /></>
+          )}
+        </button>
+      </div>
     </section>
   );
 }

@@ -63,9 +63,9 @@ export default function Contact() {
                 <div className="w-14 h-14 rounded-2xl bg-[#1e1a38] flex items-center justify-center text-purple-400 shrink-0">
                   <Mail size={24} />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col w-full overflow-hidden">
                   <span className="text-slate-400 text-sm font-medium mb-1">Email</span>
-                  <a href="mailto:iamvivekchoudhary77@gmail.com" className="text-white font-bold text-lg hover:text-purple-400 transition-colors">
+                  <a href="mailto:viveksingh31722@gmail.com" className="text-white font-bold text-base md:text-lg hover:text-purple-400 transition-colors break-all">
                     viveksingh31722@gmail.com
                   </a>
                 </div>
