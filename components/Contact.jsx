@@ -66,7 +66,7 @@ export default function Contact() {
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-sm font-medium mb-1">Email</span>
                   <a href="mailto:iamvivekchoudhary77@gmail.com" className="text-white font-bold text-lg hover:text-purple-400 transition-colors">
-                    iamvivekchoudhary77@gmail.com
+                    viveksingh31722@gmail.com
                   </a>
                 </div>
               </div>
@@ -78,7 +78,7 @@ export default function Contact() {
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-sm font-medium mb-1">Phone</span>
                   <a href="tel:+15084109399" className="text-white font-bold text-lg hover:text-purple-400 transition-colors">
-                    +1 (508) 410-9399
+                    +91 6393664992
                   </a>
                 </div>
               </div>
@@ -90,7 +90,7 @@ export default function Contact() {
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-sm font-medium mb-1">Location</span>
                   <span className="text-white font-bold text-lg">
-                    Boston, Massachusetts, USA
+                    Noida, Uttar Pradesh, India
                   </span>
                 </div>
               </div>
