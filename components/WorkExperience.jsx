@@ -170,7 +170,7 @@ export default function WorkExperience() {
   const [showAll, setShowAll] = useState(false);
   
   return (
-    <section id="experience" className="py-24 px-6 max-w-6xl mx-auto relative min-h-screen">
+    <section id="experience" className="py-12 md:py-24 px-4 sm:px-6 pb-28 md:pb-24 max-w-6xl mx-auto relative min-h-screen scroll-mt-32">
       <motion.div 
         className="text-center mb-20"
         initial={{ opacity: 0, y: 20 }}

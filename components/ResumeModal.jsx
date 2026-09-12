@@ -1,16 +1,20 @@
 "use client";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download } from "lucide-react";
+import { X, Download, Upload } from "lucide-react";
 
 export default function ResumeModal({ isOpen, onClose }) {
   // Prevent scrolling on the background when modal is open
-  if (typeof document !== "undefined") {
+  useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-  }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -39,6 +43,13 @@ export default function ResumeModal({ isOpen, onClose }) {
                 Resume Preview
               </h3>
               <div className="flex items-center gap-3">
+                <a 
+                  href="/upload-resume" 
+                  className="flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-cyan-300 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors"
+                  title="Upload & update resume PDF"
+                >
+                  <Upload size={14} /> Update Resume
+                </a>
                 <a 
                   href="/api/resume?action=download" 
                   className="flex items-center gap-2 text-sm font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/10 px-3 py-1.5 rounded-lg border border-cyan-400/20 transition-colors"

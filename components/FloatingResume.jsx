@@ -30,27 +30,7 @@ export default function FloatingResume() {
         </a>
       </motion.div>
 
-      {/* Mobile Version (Sits compactly on bottom right) */}
-      <motion.div 
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", damping: 20, delay: 1 }}
-        className="fixed bottom-6 right-6 z-[9000] md:hidden flex flex-col gap-3"
-      >
-        <button 
-          onClick={() => setIsModalOpen(true)} 
-          className="bg-[#0f172a] border border-cyan-500/30 text-cyan-400 p-3.5 rounded-full shadow-lg"
-        >
-          <Eye size={20} />
-        </button>
-        <a 
-          href="/api/resume?action=download" 
-          className="bg-gradient-to-r from-cyan-400 to-purple-500 text-slate-900 p-3.5 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-        >
-          <Download size={20} />
-        </a>
-      </motion.div>
-
+      {/* Mobile Version hidden to prevent UI overlap with bottom nav */}
       <ResumeModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );

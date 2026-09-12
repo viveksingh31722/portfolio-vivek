@@ -1,140 +1,307 @@
 "use client";
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { Terminal, User, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, FastForward, Terminal, Download, MapPin, Sparkles, Cpu, Code2, Activity } from "lucide-react";
 
-export default function Hero() {
-  const fullText = "Vivek Singh";
-  const [typedText, setTypedText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    let timeout;
-
-    if (!isDeleting && typedText === fullText) {
-      // Pause at the end of typing before deleting
-      timeout = setTimeout(() => setIsDeleting(true), 3000);
-    } else if (isDeleting && typedText === "") {
-      // Pause before typing again
-      setIsDeleting(false);
-      timeout = setTimeout(() => {}, 500); 
-    } else {
-      // Typing or Deleting
-      timeout = setTimeout(() => {
-        setTypedText(
-          isDeleting 
-            ? fullText.substring(0, typedText.length - 1) 
-            : fullText.substring(0, typedText.length + 1)
-        );
-      }, isDeleting ? 60 : 120); 
-    }
-    return () => clearTimeout(timeout);
-  }, [typedText, isDeleting, fullText]);
-
+export default function Hero({ onOpenQuickView }) {
   return (
-    <section className="min-h-screen flex items-center relative pt-20 pb-16 overflow-hidden">
-      <div className="container mx-auto px-6 max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
-        
-        {/* Left Content */}
-        <motion.div 
-          className="flex flex-col items-start text-left"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+    <section 
+      id="chapter-00" 
+      className="min-h-screen relative flex flex-col justify-start md:justify-center px-4 sm:px-6 pt-14 md:pt-40 sm:pt-48 pb-10 md:pb-20 overflow-hidden bg-[#030712] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.18),rgba(3,7,18,1))] scroll-mt-32"
+    >
+      {/* Background Radial Glows & Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b20_1px,transparent_1px),linear-gradient(to_bottom,#1e293b20_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_70%,transparent_100%)] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] bg-gradient-to-tr from-cyan-500/20 via-purple-600/15 to-transparent rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 w-[450px] h-[280px] bg-gradient-to-bl from-emerald-500/15 via-cyan-500/15 to-transparent rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto w-full relative z-10 md:space-y-16">
+        {/* Top Status & Location Bar (Desktop & Tablet) */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="hidden md:flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4"
         >
-          <Link href="/upload-resume" className="group inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-widest text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 mt-12 mb-8 hover:bg-cyan-400/20 transition-all hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">
-            <span className="relative flex h-2 w-2 mr-1">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Available for work, worldwide</span>
             </span>
-            <Sparkles size={14} className="text-cyan-400" /> 
-            <span className="drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]">OPEN FOR COLLABORATION</span>
-          </Link>
+            <span className="text-slate-600">/</span>
+            <span className="flex items-center gap-1 text-slate-300">
+              <MapPin size={13} className="text-cyan-400" />
+              <span>Lucknow / Noida, India</span>
+            </span>
+          </div>
 
-          <p className="text-cyan-400 font-semibold tracking-wide text-2xl mb-2 flex items-center min-h-[40px]">
-            Hi there, I'm <span className="ml-2 font-serif italic text-3xl md:text-4xl text-purple-400 break-words">{typedText}</span>
-            <motion.span 
-              animate={{ opacity: [1, 0] }} 
-              transition={{ repeat: Infinity, duration: 0.8 }} 
-              className="inline-block w-[3px] h-8 bg-cyan-400 ml-1" 
+          <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-400">
+            <span>SYS_STATUS:</span>
+            <span className="text-cyan-400 font-bold">100% OPERATIONAL</span>
+          </div>
+        </motion.div>
+
+        {/* DEDICATED EDITORIAL MOBILE HERO COMPOSITION (SCREENS < 768px) */}
+        <div className="md:hidden flex flex-col justify-start -mx-4 sm:-mx-6 pb-6 relative overflow-hidden">
+          {/* Full-Bleed Editorial Portrait Hero Photo (48dvh height, no card box, no border) */}
+          <div className="relative w-full h-[52dvh] max-h-[500px] overflow-hidden bg-[#030712]">
+            <img
+              src="/vivek-profile.jpg"
+              alt="Vivek Singh"
+              className="w-full h-full object-cover object-top filter contrast-[1.08] brightness-[0.92] grayscale-[0.6] saturate-[0.7]"
             />
-            <span className="inline-block animate-bounce ml-3 text-2xl">👋</span>
-          </p>
-          <h1 className="text-6xl md:text-[5.5rem] font-extrabold leading-[1.05] tracking-tight mb-6">
-            <span className="text-white block pb-2">Fullstack</span>
-            <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent block">Architect.</span>
-          </h1>
+            {/* Subtle light vignette at top so head is fully visible right below top bar */}
+            <div className="absolute top-0 inset-x-0 h-6 bg-gradient-to-b from-[#030712]/40 to-transparent z-10" />
 
-          <p className="text-lg md:text-xl text-slate-400 leading-relaxed mb-10 max-w-lg mt-2">
-            Engineering scalable digital ecosystems and immersive experiences. Turning complex logic into <strong className="text-white font-semibold">elegant solutions</strong>.
-          </p>
-
-          <div className="flex flex-wrap gap-4 items-center">
-            <a href="#projects" className="bg-cyan-500 text-slate-900 px-8 py-3.5 rounded-xl font-bold hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300">
-              View Projects
-            </a>
-            <a href="https://github.com/viveksingh31722" target="_blank" className="p-3.5 ml-2 rounded-xl border border-white/10 hover:bg-white/5 transition-all duration-300 group">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 group-hover:text-white transition-colors"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-            </a>
-            <a href="https://www.linkedin.com/in/vivek-singh-4bc/" target="_blank" className="p-3.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all duration-300 group">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 group-hover:text-white transition-colors"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
-            </a>
-            <a href="mailto:viveksingh31722@gmail.com" className="p-3.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all duration-300 group">
-              <Mail className="text-slate-400 group-hover:text-white transition-colors" size={24} />
-            </a>
+            {/* Bottom Smooth Dark Vignette Overlay — Image Fades Naturally into Dark Background */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/90 via-[#030712]/30 to-transparent" />
           </div>
-        </motion.div>
 
-        {/* Right Content - Terminal UI */}
-        <motion.div 
-          className="relative w-full max-w-lg mx-auto lg:ml-auto"
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          {/* Text Content Emerging Smoothly from Image Fade Area */}
+          <div className="px-6 relative z-10 -mt-20 space-y-4">
+            <span className="text-xs font-mono text-cyan-400 font-bold uppercase tracking-widest block">
+              FULL-STACK & AI SYSTEMS
+            </span>
+
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-[1.1]">
+              Hello, I'm Vivek <br />
+              Singh.
+            </h1>
+
+            <p className="text-slate-300 text-base leading-relaxed font-sans max-w-md">
+              Building production-grade software systems, engineering tools and AI-powered applications.
+            </p>
+
+            {/* Actions: Primary CTA & Quiet Secondary Link */}
+            <div className="pt-3 flex flex-col gap-3">
+              <a
+                href="#chapter-01"
+                className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-sm flex items-center justify-center gap-2.5 shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-98"
+              >
+                <span>START THE STORY</span>
+                <ArrowRight size={16} />
+              </a>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 px-1 text-[11px] sm:text-xs">
+                <button
+                  onClick={onOpenQuickView}
+                  className="font-mono text-cyan-400 font-bold hover:text-cyan-300 transition-colors flex items-center gap-1 cursor-pointer py-1"
+                >
+                  <Sparkles size={13} />
+                  <span>Recruiter Summary</span>
+                </button>
+
+                <a
+                  href="#work"
+                  className="font-mono text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-1 py-1"
+                >
+                  <span>Skip to work →</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* DESKTOP & TABLET 2-COLUMN SPLIT SHOWCASE (SCREENS >= 768px) */}
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Story Headline & Interactive Developer Config */}
+          <div className="lg:col-span-7 space-y-8">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/40 text-xs font-mono text-cyan-300 shadow-[0_0_25px_rgba(6,182,212,0.2)]"
+            >
+              <Terminal size={14} className="text-cyan-400" />
+              <span>CHAPTER 00 — THE STORY BEGINS</span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-4xl sm:text-6xl md:text-6xl font-bold tracking-tight text-white leading-[1.12]"
+            >
+              Hey, I'm Vivek — <br />
+              <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
+                Full-Stack & AI Systems
+              </span>{" "}
+              Engineer.
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-slate-300 text-lg sm:text-xl leading-relaxed max-w-2xl"
+            >
+              Every developer has a stack. Behind every stack, there's a story. I build production-ready applications from raw code to microservices, subsea configurators, and grounded AI.
+            </motion.p>
+
+            {/* Developer Config Card (Creative Monospace Terminal Card) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="p-5 rounded-2xl bg-[#090e1c]/80 backdrop-blur-md border border-white/15 font-mono text-xs text-slate-300 space-y-2 shadow-[0_10px_30px_rgba(0,0,0,0.6)] relative overflow-hidden"
+            >
+              <div className="flex items-center justify-between text-slate-500 text-[10px] pb-2 border-b border-white/10">
+                <span>developer_manifest.json</span>
+                <span className="text-cyan-400">v2026.1</span>
+              </div>
+              <div className="text-purple-300"><span className="text-slate-500">const</span> engineer = &#123;</div>
+              <div className="pl-4"><span className="text-slate-400">name:</span> <span className="text-emerald-300">"Vivek Singh"</span>,</div>
+              <div className="pl-4"><span className="text-slate-400">coreFocus:</span> <span className="text-cyan-300">"Full-Stack, Distributed Microservices & AI RAG"</span>,</div>
+              <div className="pl-4"><span className="text-slate-400">techStack:</span> [<span className="text-amber-300">"Next.js 16"</span>, <span className="text-amber-300">"Node.js"</span>, <span className="text-amber-300">"PostgreSQL"</span>, <span className="text-amber-300">"Gemini API"</span>],</div>
+              <div className="text-purple-300">&#125;;</div>
+            </motion.div>
+
+            {/* Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="flex flex-wrap items-center gap-4 pt-2"
+            >
+              <button
+                onClick={onOpenQuickView}
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-cyan-500 text-black font-mono font-bold text-xs hover:bg-cyan-400 transition-all shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:scale-[1.02] active:scale-95 cursor-pointer"
+              >
+                <Sparkles size={16} />
+                <span>⚡ RECRUITER FAST-TRACK</span>
+              </button>
+
+              <a
+                href="#chapter-01"
+                className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-white/10 text-white font-semibold text-sm hover:bg-white/20 transition-all border border-white/20 hover:scale-[1.02] active:scale-95 group"
+              >
+                <span>Explore story</span>
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </a>
+
+              <a
+                href="#work"
+                className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl bg-white/[0.06] border border-white/15 text-slate-200 font-mono text-xs hover:bg-white/10 hover:border-cyan-400/50 hover:text-white transition-all active:scale-95 group shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+              >
+                <FastForward size={15} className="text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span>Skip to work</span>
+              </a>
+            </motion.div>
+          </div>
+
+          {/* Right Column: Holographic Cyber-Glass Portrait Showcase */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="lg:col-span-5 flex justify-center lg:justify-end"
+          >
+            {/* Outer Holographic Glow Border Container */}
+            <div className="relative w-full max-w-[430px] p-[2px] rounded-3xl bg-gradient-to-tr from-cyan-400/50 via-purple-500/40 to-emerald-400/50 shadow-[0_25px_70px_rgba(0,0,0,0.95),0_0_50px_rgba(6,182,212,0.3)] group">
+              <div className="w-full h-full bg-[#080d1b] rounded-[22px] overflow-hidden relative">
+                
+                {/* Top Desktop Window Bar inside Photo Card */}
+                <div className="px-5 py-3 bg-[#030712]/90 border-b border-white/15 flex justify-between items-center z-20 relative">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block" />
+                  </div>
+                  <span className="text-[10px] font-mono text-cyan-400 font-bold tracking-wider">
+                    VIVEK_SINGH.SYS
+                  </span>
+                </div>
+
+                {/* High-Resolution Portrait Photo */}
+                <div className="relative aspect-[4/5] overflow-hidden">
+                  <img
+                    src="/vivek-profile.jpg"
+                    alt="Vivek Singh"
+                    className="w-full h-full object-cover object-center filter contrast-[1.05] group-hover:scale-105 transition-transform duration-700"
+                  />
+
+                  {/* Specular Rim Light & Gradient Overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/30 to-transparent opacity-90" />
+                  <div className="absolute inset-0 border border-white/15 rounded-[22px] pointer-events-none" />
+
+                  {/* Floating Interactive Tech Pills Overlay */}
+                  <div className="absolute bottom-16 left-4 right-4 flex flex-wrap gap-1.5 z-10">
+                    {["Next.js 16", "Node.js", "PostgreSQL", "Gemini API", "JointJS"].map((t) => (
+                      <span key={t} className="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-[10px] font-mono text-cyan-300 border border-cyan-400/40 shadow-lg">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Author Details Footer Overlay */}
+                  <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end z-10 pt-2 border-t border-white/15">
+                    <div>
+                      <h3 className="text-lg font-bold text-white tracking-tight drop-shadow-md">
+                        Vivek Singh
+                      </h3>
+                      <p className="text-[10px] font-mono text-purple-300 font-semibold tracking-wider uppercase">
+                        FULL-STACK & AI SYSTEMS
+                      </p>
+                    </div>
+
+                    <div className="text-[10px] font-mono text-emerald-400 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded border border-emerald-500/40">
+                      IN · 26.8°N
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom Metrics & Current Roles (Desktop & Tablet) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+          className="hidden md:block space-y-6 pt-6 border-t border-white/10"
         >
-          {/* Glowing blur behind terminal */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 blur-3xl -z-10 rounded-full" />
-          
-          <div className="bg-[#0B1120] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-            {/* Terminal Header */}
-            <div className="bg-[#0F172A] px-4 py-3 flex items-center justify-between border-b border-slate-800">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-              </div>
-              <p className="text-xs font-mono text-slate-500">ZSH - 80x24</p>
+          {/* Stat Numbers Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-slate-300">
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">4+</div>
+              <div className="text-xs font-mono text-slate-400">Shipped enterprise tools</div>
             </div>
-            
-            {/* Terminal Body */}
-            <div className="p-6 font-mono text-sm leading-relaxed">
-              <div className="flex items-center gap-3 text-cyan-400 mb-4">
-                <span className="text-green-400">➜</span>
-                <span className="text-emerald-400">~</span>
-                <span className="text-white">npm install innovation --global</span>
-                <motion.span 
-                  animate={{ opacity: [1, 0] }} 
-                  transition={{ repeat: Infinity, duration: 0.8 }}
-                  className="w-2.5 h-5 bg-cyan-400 inline-block"
-                />
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">2+</div>
+              <div className="text-xs font-mono text-slate-400">Years building software</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">15+</div>
+              <div className="text-xs font-mono text-slate-400">Core tech stacks</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">&lt;50ms</div>
+              <div className="text-xs font-mono text-slate-400">Real-time chat latency</div>
+            </div>
+          </div>
+
+          {/* Current Role Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl bg-[#080d1b]/70 border border-white/15 flex items-center justify-between group hover:border-cyan-400/50 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+              <div>
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">WORKING AT</span>
+                <span className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
+                  IDG10 Engineering Solutions
+                </span>
               </div>
-              <p className="text-slate-500 mb-8"># Resolving dependencies...</p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#0F172A] border border-slate-800 p-4 rounded-xl hover:border-cyan-500/50 transition-colors">
-                  <p className="text-xs font-semibold text-cyan-400 mb-1 tracking-wider">STATUS</p>
-                  <p className="text-white font-bold font-sans">Building Future</p>
-                </div>
-                <div className="bg-[#0F172A] border border-slate-800 p-4 rounded-xl hover:border-purple-500/50 transition-colors">
-                  <p className="text-xs font-semibold text-purple-400 mb-1 tracking-wider">STACK</p>
-                  <p className="text-white font-bold font-sans">Full-Stack</p>
-                </div>
+              <ArrowRight size={16} className="text-slate-400 group-hover:text-cyan-400 group-hover:translate-x-1 transition-transform" />
+            </div>
+
+            <div className="p-5 rounded-2xl bg-[#080d1b]/70 border border-white/15 flex items-center justify-between group hover:border-purple-400/50 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+              <div>
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">BUILDING</span>
+                <span className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">
+                  DocuLens & MedTrackInsight
+                </span>
               </div>
+              <ArrowRight size={16} className="text-slate-400 group-hover:text-purple-400 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         </motion.div>
-
       </div>
     </section>
   );

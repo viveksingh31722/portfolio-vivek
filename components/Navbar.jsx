@@ -1,16 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Menu, X } from "lucide-react";
+import { Code2, Menu, X, FastForward } from "lucide-react";
 import Link from "next/link";
 
-export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
+export default function Navbar({ onOpenQuickView }) {
+  const [pastHero, setPastHero] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      // Collapse header once user scrolls past 350px (Hero section threshold)
+      setPastHero(window.scrollY > 350);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -19,7 +21,6 @@ export default function Navbar() {
   const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMenu = () => setIsMobileMenuOpen(false);
 
-  // Prevent background scroll when menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -28,103 +29,233 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen]);
 
+  const navLinks = [
+    { name: "Story", href: "#chapter-00" },
+    { name: "Origin", href: "#chapter-01" },
+    { name: "Work", href: "#work" },
+    { name: "AI & Systems", href: "#chapter-04" },
+    { name: "DNA", href: "#dna" },
+    { name: "Notes", href: "#field-notes" },
+    { name: "About", href: "#about" },
+    { name: "Lab", href: "#lab" },
+    { name: "Contact", href: "#contact" },
+  ];
+
+  // Compact links shown when header is collapsed past hero
+  const collapsedLinks = [
+    { name: "Work", href: "#work" },
+    { name: "AI", href: "#chapter-04" },
+    { name: "Notes", href: "#field-notes" },
+    { name: "Lab", href: "#lab" },
+    { name: "Contact", href: "#contact" },
+  ];
+
+  const visibleLinks = pastHero && !isHovered ? collapsedLinks : navLinks;
+
   return (
     <>
-    <header 
-      className={`fixed top-0 left-0 right-0 z-[10005] transition-all duration-500 ${
-        scrolled ? "py-3 pb-5 lg:pb-3 bg-background/80 backdrop-blur-xl shadow-lg" : "py-6 pb-8 lg:pb-6 bg-transparent"
-      }`}
-    >
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          {/* Logo */}
-          <Link href="/" onClick={closeMenu} className="flex items-center gap-2 group z-[10001]">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-secondary to-primary p-[1px] group-hover:rotate-6 transition-transform">
-              <div className="w-full h-full bg-background rounded-[11px] flex items-center justify-center">
-                <Code2 size={20} className="text-secondary" />
+      {/* MOBILE TOP BAR (SCREENS < 768px) */}
+      <div className="fixed top-0 left-0 right-0 z-[100030] md:hidden bg-[#030712]/90 backdrop-blur-xl border-b border-white/10 px-5 py-3 pt-safe flex items-center justify-between shadow-lg h-14">
+        <Link href="#chapter-00" className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[1px]">
+            <div className="w-full h-full bg-[#030712] rounded-full flex items-center justify-center">
+              <Code2 size={12} className="text-cyan-400" />
+            </div>
+          </div>
+          <span className="font-bold text-sm tracking-tight text-white font-sans">
+            VIVEK<span className="text-cyan-400">.SINGH</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 ml-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>ONLINE</span>
+          </span>
+        </Link>
+      </div>
+
+      {/* DESKTOP & TABLET FLOATING NAVBAR (SCREENS >= 768px) */}
+      <motion.header
+        layout
+        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        className={`hidden md:block fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[10005] w-[calc(100%-2rem)] transition-all duration-500 ${
+          pastHero && !isHovered ? "max-w-3xl" : "max-w-6xl"
+        }`}
+      >
+        <motion.div
+          layout
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className={`w-full rounded-full transition-all duration-500 flex justify-between items-center px-4 sm:px-6 py-2.5 backdrop-blur-2xl border ${
+            pastHero
+              ? "bg-gradient-to-b from-white/[0.14] via-[#030712]/85 to-[#030712]/95 border-cyan-400/50 shadow-[inset_0_1px_2px_0_rgba(255,255,255,0.6),0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(6,182,212,0.25)]"
+              : "bg-gradient-to-b from-white/[0.12] via-[#030712]/75 to-[#030712]/90 border-white/25 hover:border-white/40 shadow-[inset_0_1px_2px_0_rgba(255,255,255,0.45),0_20px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(255,255,255,0.06)]"
+          }`}
+        >
+          {/* Brand Logo inside Glass Pill */}
+          <Link href="#chapter-00" onClick={closeMenu} className="flex items-center gap-2.5 group z-[10001] shrink-0">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[1px] group-hover:rotate-12 transition-transform shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+              <div className="w-full h-full bg-[#030712] rounded-full flex items-center justify-center">
+                <Code2 size={18} className="text-cyan-400" />
               </div>
             </div>
-            <span className="font-bold text-xl tracking-tight text-white">
-              VIVEK<span className="text-secondary">.SINGH</span>
+            <span className="font-bold text-base tracking-tight text-white drop-shadow-md">
+              VIVEK<span className="text-cyan-400">.SINGH</span>
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-10">
-            <Link href="#experience" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Experience</Link>
-            <Link href="#projects" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Projects</Link>
-            <Link href="#blogs" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Blogs</Link>
-            <Link href="#contact" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Contact</Link>
-            
-            <a 
-              href="https://github.com/viveksingh31722" 
-              target="_blank" 
-              className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-semibold text-white hover:bg-white/10 transition-all"
+          {/* Desktop Animated Glass Navigation Links */}
+          <motion.nav 
+            layout
+            className="hidden lg:flex items-center gap-1 bg-white/[0.07] border border-white/20 rounded-full p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]"
+          >
+            <AnimatePresence mode="popLayout">
+              {visibleLinks.map((link) => (
+                <motion.a
+                  key={link.name}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  href={link.href}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-mono tracking-wider uppercase text-slate-200 hover:text-white hover:bg-white/15 transition-all drop-shadow shrink-0"
+                >
+                  {link.name}
+                </motion.a>
+              ))}
+            </AnimatePresence>
+          </motion.nav>
+
+          {/* Recruiter Fast-Track & Actions */}
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <button
+              onClick={onOpenQuickView}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/60 text-xs font-mono text-cyan-200 hover:bg-cyan-500/30 transition-all font-bold shadow-[0_0_15px_rgba(6,182,212,0.3)]"
             >
-              Github
+              <span>⚡ QUICK VIEW</span>
+            </button>
+
+            <a
+              href="#work"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-slate-300 hover:bg-white/10 transition-all"
+            >
+              <FastForward size={13} className="text-cyan-400" />
+              <span>Skip</span>
             </a>
+
+            {(!pastHero || isHovered) && (
+              <motion.a
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                href="https://github.com/viveksingh31722"
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 rounded-full bg-white/10 border border-white/25 text-xs font-mono text-white hover:bg-white/20 transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.35)]"
+              >
+                GitHub
+              </motion.a>
+            )}
           </div>
 
-          {/* Hamburger Button (Visible on tablet/mobile) */}
-          <button 
+          {/* Hamburger Menu (Mobile/Tablet) */}
+          <button
             onClick={toggleMenu}
-            className="lg:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all z-[10001]"
+            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/10 border border-white/25 text-white hover:bg-white/20 transition-all z-[10001] shadow-[inset_0_1px_1px_rgba(255,255,255,0.35)]"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
-            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-        </div>
-      </header>
+        </motion.div>
+      </motion.header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile & Tablet Full-Screen Menu Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 1.1 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed inset-0 z-[10000] bg-background/98 backdrop-blur-2xl flex flex-col items-center justify-center lg:hidden"
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[100050] bg-[#030712]/98 backdrop-blur-2xl flex flex-col items-center justify-start overflow-y-auto px-6 py-6 lg:hidden"
           >
-            <div className="flex flex-col items-center gap-6">
-              {[
-                { name: "Experience", href: "#experience", num: "01" },
-                { name: "Projects", href: "#projects", num: "02" },
-                { name: "Blogs", href: "#blogs", num: "03" },
-                { name: "Contact", href: "#contact", num: "04" }
-              ].map((item, idx) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 + idx * 0.05 }}
-                  className="group"
-                >
-                  <Link 
-                    href={item.href} 
-                    onClick={closeMenu}
-                    className="flex items-center gap-4 text-3xl md:text-4xl font-bold text-white hover:text-secondary transition-all"
-                  >
-                    <span className="text-xs font-mono text-secondary/60 mt-1">{item.num}</span>
-                    {item.name}
-                  </Link>
-                </motion.div>
-              ))}
-              
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="flex gap-6 mt-12"
+            {/* Overlay Top Header Bar */}
+            <div className="w-full max-w-lg flex items-center justify-between pb-5 border-b border-white/10 shrink-0">
+              <Link href="#chapter-00" onClick={closeMenu} className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[1px]">
+                  <div className="w-full h-full bg-[#030712] rounded-full flex items-center justify-center">
+                    <Code2 size={16} className="text-cyan-400" />
+                  </div>
+                </div>
+                <span className="font-bold text-base tracking-tight text-white font-sans">
+                  VIVEK<span className="text-cyan-400">.SINGH</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 ml-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>ONLINE</span>
+                </span>
+              </Link>
+
+              <button
+                onClick={closeMenu}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer"
+                aria-label="Close menu"
               >
-                <a 
-                  href="https://github.com/viveksingh31722" 
-                  target="_blank" 
-                  className="flex items-center gap-3 px-8 py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Menu Options Container */}
+            <div className="flex flex-col items-center gap-5 w-full max-w-sm py-8 my-auto">
+              <div className="w-full flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    closeMenu();
+                    if (onOpenQuickView) onOpenQuickView();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-cyan-500 text-black font-mono text-xs font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-                  Github
+                  ⚡ QUICK VIEW RECRUITER SUMMARY
+                </button>
+                <a
+                  href="#work"
+                  onClick={closeMenu}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-white/5 border border-white/15 text-slate-300 font-mono text-xs hover:bg-white/10 transition-colors"
+                >
+                  <FastForward size={14} className="text-cyan-400" />
+                  <span>Skip to work</span>
                 </a>
-              </motion.div>
+              </div>
+
+              <div className="w-full space-y-1">
+                {navLinks.map((item, idx) => (
+                  <motion.div
+                    key={item.name}
+                    initial={{ y: 15, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.02 + idx * 0.03 }}
+                    className="w-full text-center"
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={closeMenu}
+                      className="text-xl sm:text-2xl font-bold text-slate-200 hover:text-cyan-400 transition-colors block py-2"
+                    >
+                      {item.name}
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="flex gap-4 pt-2">
+                <a
+                  href="https://github.com/viveksingh31722"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-6 py-2.5 rounded-full bg-white/10 border border-white/25 text-white font-mono text-xs font-semibold hover:bg-white/20 transition-all"
+                >
+                  GitHub Profile
+                </a>
+              </div>
             </div>
           </motion.div>
         )}
