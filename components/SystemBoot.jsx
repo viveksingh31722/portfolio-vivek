@@ -39,27 +39,29 @@ export default function SystemBoot({ onStartStory, onSkipIntro }) {
       {/* Background Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto relative z-10 space-y-8">
-        {/* Terminal Header */}
-        <div className="flex items-center justify-between p-3 rounded-t-2xl bg-[#090e1c] border border-white/15 border-b-0 text-xs text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block" />
-            <span className="text-slate-500 ml-2 hidden sm:inline">bash - 80x24</span>
+      <div className="max-w-4xl mx-auto relative z-10">
+        {/* Single Unified Terminal Window Card */}
+        <div className="rounded-2xl border border-white/15 overflow-hidden bg-[#060a15]/95 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+          {/* Terminal Header Bar */}
+          <div className="flex items-center justify-between p-3.5 bg-[#090e1c] border-b border-white/10 text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
+              <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
+              <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block" />
+              <span className="text-slate-500 ml-2 hidden sm:inline">bash - 80x24</span>
+            </div>
+
+            <button
+              onClick={handleSkip}
+              className="flex items-center gap-1.5 px-3 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/15 text-slate-300 transition-colors text-[11px] cursor-pointer"
+            >
+              <FastForward size={12} className="text-cyan-400" />
+              <span>Skip intro</span>
+            </button>
           </div>
 
-          <button
-            onClick={handleSkip}
-            className="flex items-center gap-1.5 px-3 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/15 text-slate-300 transition-colors text-[11px]"
-          >
-            <FastForward size={12} className="text-cyan-400" />
-            <span>Skip intro</span>
-          </button>
-        </div>
-
-        {/* Terminal Output Area */}
-        <div className="p-6 sm:p-8 rounded-b-2xl bg-[#060a15]/95 border border-white/15 border-t-0 space-y-4 text-xs sm:text-sm text-slate-300 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+          {/* Terminal Output Area */}
+          <div className="p-6 sm:p-8 space-y-4 text-xs sm:text-sm text-slate-300">
           <div className="flex items-center gap-2 text-cyan-400 font-bold">
             <span>$ whoami</span>
           </div>
@@ -140,5 +142,6 @@ export default function SystemBoot({ onStartStory, onSkipIntro }) {
         </div>
       </div>
     </div>
+  </div>
   );
 }
