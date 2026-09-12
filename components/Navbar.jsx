@@ -65,11 +65,12 @@ export default function Navbar({ onOpenQuickView }) {
           <span className="font-bold text-sm tracking-tight text-white font-sans">
             VIVEK<span className="text-cyan-400">.SINGH</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 ml-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>ONLINE</span>
-          </span>
         </Link>
+
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>ACTIVE</span>
+        </span>
       </div>
 
       {/* DESKTOP & TABLET FLOATING NAVBAR (SCREENS >= 768px) */}
@@ -189,19 +190,22 @@ export default function Navbar({ onOpenQuickView }) {
                 <span className="font-bold text-base tracking-tight text-white font-sans">
                   VIVEK<span className="text-cyan-400">.SINGH</span>
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 ml-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>ONLINE</span>
-                </span>
               </Link>
 
-              <button
-                onClick={closeMenu}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer"
-                aria-label="Close menu"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>ACTIVE</span>
+                </span>
+
+                <button
+                  onClick={closeMenu}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Menu Options Container */}

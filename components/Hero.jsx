@@ -41,22 +41,22 @@ export default function Hero({ onOpenQuickView }) {
 
         {/* DEDICATED EDITORIAL MOBILE HERO COMPOSITION (SCREENS < 768px) */}
         <div className="md:hidden flex flex-col justify-start -mx-4 sm:-mx-6 pb-6 relative overflow-hidden">
-          {/* Full-Bleed Editorial Portrait Hero Photo (48dvh height, no card box, no border) */}
-          <div className="relative w-full h-[52dvh] max-h-[500px] overflow-hidden bg-[#030712]">
+          {/* Full-Bleed Editorial Portrait Hero Photo (Upper body visible down to elbows) */}
+          <div className="relative w-full h-[56dvh] max-h-[520px] overflow-hidden bg-[#030712]">
             <img
               src="/vivek-profile.jpg"
               alt="Vivek Singh"
-              className="w-full h-full object-cover object-top filter contrast-[1.08] brightness-[0.92] grayscale-[0.6] saturate-[0.7]"
+              className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[0.98] saturate-[0.85]"
             />
             {/* Subtle light vignette at top so head is fully visible right below top bar */}
             <div className="absolute top-0 inset-x-0 h-6 bg-gradient-to-b from-[#030712]/40 to-transparent z-10" />
 
-            {/* Bottom Smooth Dark Vignette Overlay — Image Fades Naturally into Dark Background */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/90 via-[#030712]/30 to-transparent" />
+            {/* Bottom Dark Shadow Vignette Overlay — Starts at elbow level to fade naturally */}
+            <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-[#030712] via-[#030712]/80 to-transparent z-10 pointer-events-none" />
           </div>
 
-          {/* Text Content Emerging Smoothly from Image Fade Area */}
-          <div className="px-6 relative z-10 -mt-20 space-y-4">
+          {/* Text Content Emerging Smoothly Below Elbow Level */}
+          <div className="px-6 relative z-10 -mt-10 space-y-4">
             <span className="text-xs font-mono text-cyan-400 font-bold uppercase tracking-widest block">
               FULL-STACK & AI SYSTEMS
             </span>
