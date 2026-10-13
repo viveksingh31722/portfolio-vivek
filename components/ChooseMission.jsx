@@ -1,16 +1,65 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { Briefcase, Wrench, Code2, ArrowRight, Check } from "lucide-react";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
 export default function ChooseMission({ onSelectMission }) {
   const [selectedMission, setSelectedMission] = useState(null);
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const cardsRef = useRef(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("vivek_portfolio_mission");
     if (saved) {
       setSelectedMission(saved);
     }
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      if (cardsRef.current) {
+        const cards = cardsRef.current.querySelectorAll(".mission-card");
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.12,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: cardsRef.current,
+              start: "top 80%",
+              once: true,
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
   const handleSelect = (id) => {
@@ -50,37 +99,43 @@ export default function ChooseMission({ onSelectMission }) {
   ];
 
   return (
-    <section id="mission" className="py-12 md:py-20 px-4 sm:px-6 max-w-6xl mx-auto relative bg-[#030712] border-b border-white/10 scroll-mt-32">
-      <div className="text-center mb-8 md:mb-12 space-y-3">
-        <span className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-[10px] sm:text-xs font-mono text-cyan-300 uppercase tracking-wider sm:tracking-widest max-w-full inline-block text-center">
+    <section
+      ref={sectionRef}
+      id="mission"
+      className="py-16 md:py-24 px-4 sm:px-6 max-w-6xl mx-auto relative bg-[#030712] border-b border-white/10 scroll-mt-32"
+    >
+      <div ref={headerRef} className="text-center mb-10 md:mb-14 space-y-3">
+        <span className="px-3.5 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-xs font-mono text-cyan-300 uppercase tracking-widest inline-block text-center">
           CHAPTER 01 — CHOOSE YOUR MISSION
         </span>
-        <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
+        <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
           Why are you here today?
         </h2>
-        <p className="text-slate-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-          Tailor your exploration path. Pick the perspective that best matches your goal.
+        <p className="text-slate-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-light">
+          Tailor your exploration path. Pick the perspective that best matches your immediate goal.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <div
+        ref={cardsRef}
+        className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6"
+      >
         {missions.map((m) => {
           const Icon = m.icon;
           const isSelected = selectedMission === m.id;
           return (
-            <motion.div
+            <div
               key={m.id}
-              whileHover={{ y: -4 }}
               onClick={() => handleSelect(m.id)}
-              className={`p-5 sm:p-8 rounded-2xl md:rounded-3xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 sm:space-y-6 relative overflow-hidden group shadow-xl ${
+              className={`mission-card p-6 sm:p-8 rounded-2xl md:rounded-3xl border transition-all duration-400 cursor-pointer flex flex-col justify-between space-y-5 sm:space-y-6 relative overflow-hidden group shadow-[0_15px_35px_rgba(0,0,0,0.6)] hover:-translate-y-1.5 ${
                 isSelected
                   ? "bg-gradient-to-b from-white/[0.08] to-[#080d1b] border-cyan-400/80 shadow-[0_0_35px_rgba(6,182,212,0.25)]"
-                  : "bg-white/[0.02] border-white/10 hover:border-white/25 hover:bg-white/[0.04]"
+                  : "bg-[#090e1c]/80 border-white/10 hover:border-cyan-400/40 hover:bg-white/[0.04]"
               }`}
             >
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500/10 group-hover:border-cyan-400/40 transition-all duration-300">
                     <Icon size={20} />
                   </div>
                   {isSelected && (
@@ -91,10 +146,10 @@ export default function ChooseMission({ onSelectMission }) {
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-white tracking-tight mb-2">
+                  <h3 className="text-xl font-bold text-white tracking-tight mb-2 group-hover:text-cyan-300 transition-colors">
                     [{m.title}]
                   </h3>
-                  <p className="text-slate-300 text-sm leading-relaxed">
+                  <p className="text-slate-300 text-sm leading-relaxed font-light">
                     {m.subtitle}
                   </p>
                 </div>
@@ -103,7 +158,7 @@ export default function ChooseMission({ onSelectMission }) {
               <div className="pt-4 border-t border-white/5 space-y-4">
                 <div className="text-[11px] font-mono text-slate-400 leading-tight">
                   <span className="text-slate-500 block uppercase mb-1">Recommended Flow:</span>
-                  <span className="text-cyan-300">{m.focus}</span>
+                  <span className="text-cyan-300 font-medium">{m.focus}</span>
                 </div>
 
                 <a
@@ -111,10 +166,10 @@ export default function ChooseMission({ onSelectMission }) {
                   className="w-full inline-flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-slate-200 group-hover:bg-cyan-500 group-hover:text-black group-hover:border-cyan-400 transition-all font-semibold"
                 >
                   <span>Select Path</span>
-                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform duration-300" />
                 </a>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -123,7 +178,7 @@ export default function ChooseMission({ onSelectMission }) {
         <a
           href="#chapter-01"
           onClick={() => handleSelect("all")}
-          className="text-xs font-mono text-slate-400 hover:text-cyan-300 underline underline-offset-4 transition-colors"
+          className="text-xs font-mono text-slate-400 hover:text-cyan-300 underline underline-offset-4 transition-colors cursor-pointer"
         >
           [ Explore everything without personalization ]
         </a>

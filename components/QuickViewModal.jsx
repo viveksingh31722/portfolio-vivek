@@ -1,18 +1,44 @@
 "use client";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, Mail, ExternalLink, ShieldCheck, Cpu, Code2, Layers, MapPin } from "lucide-react";
 import ResumeModal from "./ResumeModal";
-import { useState } from "react";
+import { useLenis } from "@/components/SmoothScrollProvider";
 
 export default function QuickViewModal({ isOpen, onClose }) {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      if (lenis) lenis.stop();
+    } else {
+      document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
+    };
+  }, [isOpen, lenis]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
     <>
       <AnimatePresence>
-        <div className="fixed inset-0 z-[100050] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div data-lenis-prevent className="fixed inset-0 z-[100050] flex items-center justify-center p-4 sm:p-6 overflow-y-auto overscroll-contain">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -24,11 +50,12 @@ export default function QuickViewModal({ isOpen, onClose }) {
 
           {/* Modal Card */}
           <motion.div
+            data-lenis-prevent
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="relative w-full max-w-4xl bg-[#090e1a] border border-cyan-500/30 rounded-3xl p-6 sm:p-10 text-slate-200 shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_40px_rgba(6,182,212,0.2)] my-auto max-h-[90vh] overflow-y-auto z-10 space-y-8"
+            className="relative w-full max-w-4xl bg-[#090e1a] border border-cyan-500/30 rounded-3xl p-6 sm:p-10 text-slate-200 shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_40px_rgba(6,182,212,0.2)] my-auto max-h-[90vh] overflow-y-auto z-10 space-y-8 overscroll-contain"
           >
             {/* Header */}
             <div className="flex justify-between items-start border-b border-white/10 pb-6">

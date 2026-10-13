@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowUpRight, Network, Activity, BookOpen } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowUpRight, Network, Activity, BookOpen, AlertTriangle } from "lucide-react";
 import CaseStudyModal from "./CaseStudyModal";
+import ImageReveal from "./ImageReveal";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
 export default function ChapterBiggerSystems() {
   const [activeStep, setActiveStep] = useState(0);
@@ -10,6 +11,8 @@ export default function ChapterBiggerSystems() {
   const [showHood, setShowHood] = useState(false);
   const [trafficUsers, setTrafficUsers] = useState(100);
   const [selectedStrategy, setSelectedStrategy] = useState("queue");
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
 
   const chatCaseStudy = {
     title: "Real-Time Chat Application & Microservices",
@@ -58,102 +61,90 @@ export default function ChapterBiggerSystems() {
     {
       id: "queue",
       title: "3. RabbitMQ Message Queue",
-      tech: "RabbitMQ AMQP",
-      desc: "Buffers peak traffic spikes and asynchronously dispatches message processing jobs to worker services.",
+      tech: "AMQP Message Broker",
+      desc: "Buffers burst message volumes into durable queues, protecting backend worker processes from traffic spikes.",
     },
     {
       id: "workers",
-      title: "4. Microservice Workers",
-      tech: "Node.js Workers",
-      desc: "Decoupled background tasks handle notifications, search indexing, and chat history persistence.",
+      title: "4. Async Worker Microservices",
+      tech: "Decoupled Workers",
+      desc: "Consumes queued message payloads asynchronously, executing indexing, notifications, and persistence.",
     },
     {
-      id: "cache",
-      title: "5. Redis & DB Persistence",
-      tech: "Redis / MongoDB",
-      desc: "In-memory Redis layer caches hot channel states while MongoDB persists encrypted chat transcripts.",
+      id: "persistence",
+      title: "5. Redis & MongoDB Hybrid",
+      tech: "Cache + Document Store",
+      desc: "Redis maintains active room states and recent message caches, while MongoDB provides persistent history storage.",
     },
   ];
 
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <>
-      <section id="chapter-03" className="py-12 md:py-28 px-4 sm:px-6 pb-28 md:pb-28 max-w-6xl mx-auto border-t border-white/5 relative bg-[#030712] scroll-mt-32">
+      <section
+        ref={sectionRef}
+        id="chapter-03"
+        className="py-16 md:py-28 px-4 sm:px-6 pb-28 md:pb-28 max-w-6xl mx-auto border-t border-white/5 relative bg-[#030712] scroll-mt-32"
+      >
         {/* Chapter Label */}
         <div className="flex justify-center mb-6">
-          <span className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-mono text-cyan-400 uppercase tracking-wider sm:tracking-widest max-w-full text-center">
+          <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-cyan-400 uppercase tracking-widest text-center">
             CHAPTER 03 — WHEN SYSTEMS GOT BIGGER
           </span>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16 max-w-3xl mx-auto"
-        >
-          <h2 className="text-3xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
-            Messages shouldn't have to wait.
+        <div ref={headerRef} className="text-center mb-16 max-w-3xl mx-auto space-y-3">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+            Real-Time Chat & Microservices
           </h2>
-          <p className="text-slate-400 text-lg">
-            Scaling backend architectures for low-latency communication, microservice decoupling, and high-concurrency throughput.
+          <p className="text-slate-400 text-base sm:text-lg font-light leading-relaxed">
+            Transitioning from monolithic APIs to event-driven message architectures with Socket.IO, RabbitMQ, and Redis.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Full-Width Story Showcase */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-white/[0.02] border border-white/10 rounded-3xl p-8 sm:p-12 mb-12 shadow-2xl space-y-6"
-        >
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-wider">
-            <Network size={16} /> Distributed Microservices Architecture
+        {/* STEP 01: THE CONCURRENCY PROBLEM */}
+        <div className="bg-[#090e1c]/80 backdrop-blur-md border border-purple-500/20 rounded-3xl p-8 sm:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-4 mb-8">
+          <div className="flex items-center gap-2.5 text-purple-400 font-mono text-xs font-semibold uppercase tracking-wider">
+            <Network size={17} />
+            <span>01. THE CONCURRENCY BOTTLENECK</span>
           </div>
 
-          <h3 className="text-2xl sm:text-4xl font-bold text-white leading-tight">
-            Real-Time Chat & High-Throughput Microservice Systems
+          <h3 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
+            When Monolithic REST APIs Collapsed Under Peak Concurrency
           </h3>
 
-          <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-4xl">
-            When transitioning from single monolithic APIs to distributed systems, simple HTTP requests no longer cut it. By combining <strong className="text-white">Socket.IO</strong>, <strong className="text-white">RabbitMQ</strong> queues, and <strong className="text-white">Redis</strong> in-memory caching, messages flow instantly while background tasks process asynchronously.
+          <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-4xl font-light">
+            Traditional HTTP polling overheated server resources and created message delays during traffic spikes. The challenge was building an architecture capable of high-concurrency real-time delivery without overwhelming database write threads or dropping messages.
           </p>
-
-          <div className="flex flex-wrap gap-2 pt-2">
-            {["MERN", "Socket.IO", "RabbitMQ", "Redis", "Microservices", "PostgreSQL", "ElasticSearch"].map((tech) => (
-              <span key={tech} className="px-3 py-1 bg-white/5 rounded-lg text-xs font-mono text-slate-300 border border-white/5">
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          <div className="pt-4 flex flex-wrap gap-4 border-t border-white/5">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs font-mono text-cyan-300 hover:bg-cyan-500/20 transition-all"
-            >
-              <BookOpen size={15} />
-              <span>Read Full Case Study →</span>
-            </button>
-
-            <a
-              href="https://github.com/viveksingh31722/Chat-App-Microservices"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-slate-300 hover:bg-white/10 transition-all"
-            >
-              <span>GitHub Repository</span>
-              <ArrowUpRight size={15} />
-            </a>
-          </div>
-        </motion.div>
+        </div>
 
         {/* STEP 02: THE CHAT APP SHOWCASE FRAME */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-[#0b0f19] border border-white/10 rounded-3xl overflow-hidden shadow-2xl mb-12"
-        >
+        <div className="bg-[#0b0f19]/90 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.9)] mb-12 hover:border-cyan-400/30 transition-colors duration-500">
           {/* Window Header */}
           <div className="px-6 py-4 bg-slate-900/90 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
             <div className="flex items-center gap-3">
@@ -170,7 +161,7 @@ export default function ChapterBiggerSystems() {
             <div className="flex gap-2.5">
               <button
                 onClick={() => setShowHood(!showHood)}
-                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono transition-all border ${
+                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono transition-all border cursor-pointer ${
                   showHood
                     ? "bg-cyan-500 text-black font-bold border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                     : "bg-cyan-500/15 border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/25"
@@ -180,7 +171,7 @@ export default function ChapterBiggerSystems() {
               </button>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-200 hover:bg-white/10 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-200 hover:bg-white/10 transition-all cursor-pointer"
               >
                 <BookOpen size={14} />
                 <span>Case Study</span>
@@ -229,12 +220,18 @@ export default function ChapterBiggerSystems() {
               </div>
             </div>
           ) : (
-            <div className="p-4 sm:p-8 bg-slate-950/60 cursor-pointer" onClick={() => setIsModalOpen(true)}>
+            <div
+              className="p-4 sm:p-8 bg-slate-950/60 cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+            >
               <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl group relative">
-                <img
+                <ImageReveal
                   src="/chat-app-cover.png"
                   alt="Real-Time Chat Application Interface"
-                  className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-500"
+                  className="w-full h-auto"
+                  imgClassName="group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                  cursorText="CASE STUDY"
+                  parallaxAmount={-6}
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <span className="px-6 py-3 rounded-full bg-cyan-500 text-black font-semibold text-xs flex items-center gap-2 shadow-2xl">
@@ -246,23 +243,21 @@ export default function ChapterBiggerSystems() {
           )}
 
           {/* Tech Badges Footer */}
-          <div className="px-6 py-4 bg-slate-900/50 border-t border-white/10 flex flex-wrap items-center gap-3">
+          <div className="px-6 py-4 bg-slate-900/50 border-t border-white/10 flex flex-wrap items-center gap-2.5">
             <span className="text-xs font-mono text-slate-400 uppercase tracking-wider mr-2">TECH STACK:</span>
             {["MERN", "Socket.IO", "RabbitMQ", "Redis", "Microservices", "MongoDB", "Express"].map((tech) => (
-              <span key={tech} className="px-3 py-1 bg-white/5 text-xs font-mono text-cyan-300 rounded-lg border border-white/5">
+              <span
+                key={tech}
+                className="px-3 py-1 bg-white/5 text-xs font-mono text-cyan-300 rounded-lg border border-white/5 hover:border-cyan-400/30 transition-colors"
+              >
                 {tech}
               </span>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* INTERACTIVE TRAFFIC CONCURRENCY SIMULATOR */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-[#090d19] border border-cyan-500/30 rounded-3xl p-6 sm:p-10 space-y-6 shadow-2xl mb-12"
-        >
+        <div className="bg-[#090d19]/80 backdrop-blur-md border border-cyan-500/30 rounded-3xl p-6 sm:p-10 space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] mb-12">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-white/10">
             <div className="space-y-1">
               <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold tracking-wider">
@@ -278,7 +273,7 @@ export default function ChapterBiggerSystems() {
                 <button
                   key={num}
                   onClick={() => setTrafficUsers(num)}
-                  className={`px-2.5 py-1.5 rounded-lg border transition-all text-center ${
+                  className={`px-3 py-1.5 rounded-lg border transition-all text-center cursor-pointer ${
                     trafficUsers === num
                       ? "bg-cyan-500 text-black font-bold border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                       : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
@@ -300,7 +295,7 @@ export default function ChapterBiggerSystems() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   onClick={() => setSelectedStrategy("api")}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
+                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                     selectedStrategy === "api"
                       ? "bg-cyan-500/20 border-cyan-400 text-cyan-200"
                       : "bg-white/[0.02] border-white/10 text-slate-300 hover:bg-white/5"
@@ -312,9 +307,9 @@ export default function ChapterBiggerSystems() {
 
                 <button
                   onClick={() => setSelectedStrategy("queue")}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
+                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                     selectedStrategy === "queue"
-                      ? "bg-cyan-500/20 border-cyan-400 text-cyan-200"
+                      ? "bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.15)]"
                       : "bg-white/[0.02] border-white/10 text-slate-300 hover:bg-white/5"
                   }`}
                 >
@@ -324,7 +319,7 @@ export default function ChapterBiggerSystems() {
 
                 <button
                   onClick={() => setSelectedStrategy("db")}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
+                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                     selectedStrategy === "db"
                       ? "bg-cyan-500/20 border-cyan-400 text-cyan-200"
                       : "bg-white/[0.02] border-white/10 text-slate-300 hover:bg-white/5"
@@ -344,36 +339,31 @@ export default function ChapterBiggerSystems() {
               {selectedStrategy === "queue" ? (
                 <div className="text-emerald-300 space-y-1">
                   <div className="font-bold">✓ OPTIMAL ARCHITECTURE CHOSEN!</div>
-                  <p className="text-slate-300">
+                  <p className="text-slate-300 font-light">
                     At {trafficUsers.toLocaleString()} users, RabbitMQ buffers spike traffic asynchronously while Redis delivers in-memory hot room state under 50ms latency with 0% database locks.
                   </p>
                 </div>
               ) : selectedStrategy === "api" ? (
                 <div className="text-amber-300 space-y-1">
                   <div className="font-bold">⚠ HIGHER RESOURCE COST & LATENCY SLIP</div>
-                  <p className="text-slate-300">
+                  <p className="text-slate-300 font-light">
                     Scaling raw REST API instances handles connections but causes database connection pool exhaustion when {trafficUsers.toLocaleString()} users write simultaneously.
                   </p>
                 </div>
               ) : (
                 <div className="text-red-400 space-y-1">
                   <div className="font-bold">✖ DATABASE LOCK RISK AT {trafficUsers.toLocaleString()} USERS</div>
-                  <p className="text-slate-300">
+                  <p className="text-slate-300 font-light">
                     Direct database writes create high write lock contention on MongoDB, degrading message response latency beyond 2,000ms.
                   </p>
                 </div>
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Full-Width Interactive Message Pipeline Visualizer */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-[#0b0f19] border border-white/10 rounded-3xl p-6 sm:p-10 space-y-6 overflow-hidden"
-        >
+        {/* Live Message Pipeline Visualizer */}
+        <div className="bg-[#0b0f19]/80 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-10 space-y-6 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
           <div className="flex justify-between items-center pb-4 border-b border-white/10">
             <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
               <Activity size={14} className="text-cyan-400 animate-pulse" />
@@ -387,10 +377,10 @@ export default function ChapterBiggerSystems() {
               <div
                 key={node.id}
                 onClick={() => setActiveStep(idx)}
-                className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-[140px] relative ${
+                className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[140px] relative ${
                   activeStep === idx
-                    ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.15)]"
-                    : "bg-white/[0.02] border-white/5 hover:border-white/20"
+                    ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.15)] -translate-y-1"
+                    : "bg-white/[0.02] border-white/5 hover:border-white/20 hover:bg-white/[0.04]"
                 }`}
               >
                 <div>
@@ -402,7 +392,7 @@ export default function ChapterBiggerSystems() {
                   </span>
                 </div>
 
-                <div className="text-[11px] text-slate-400 leading-tight pt-2">
+                <div className="text-[11px] text-slate-400 leading-tight pt-2 font-light">
                   {node.desc}
                 </div>
                 {idx < architectureNodes.length - 1 && (
@@ -411,7 +401,7 @@ export default function ChapterBiggerSystems() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Case Study Modal */}

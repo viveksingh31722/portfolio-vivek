@@ -105,7 +105,7 @@ export default function PortfolioAIGuide() {
             </div>
 
             {/* Chat Messages */}
-            <div className="max-h-64 overflow-y-auto space-y-3 pr-1">
+            <div data-lenis-prevent className="max-h-64 overflow-y-auto space-y-3 pr-1 overscroll-contain">
               {chatHistory.map((msg, idx) => (
                 <div
                   key={idx}

@@ -1,14 +1,16 @@
 "use client";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { ArrowUpRight, Sparkles, BookOpen } from "lucide-react";
 import CaseStudyModal from "./CaseStudyModal";
+import ImageReveal from "./ImageReveal";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
 export default function ChapterEnterAI() {
   const [activeStage, setActiveStage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHood, setShowHood] = useState(false);
-  const [pipelineSimStep, setPipelineSimStep] = useState(0);
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
 
   const docuLensCaseStudy = {
     title: "DocuLens | Document-to-Action Project Assistant — PDA",
@@ -20,6 +22,7 @@ export default function ChapterEnterAI() {
     link: "https://doculens-coral.vercel.app/",
     github: "https://github.com/viveksingh31722",
     tags: ["Next.js 16", "React 19", "TypeScript", "Tailwind v4", "Prisma 7", "PostgreSQL", "Gemini API", "Vitest"],
+    image: "/docuLens_cover.png",
     whyTitle: "Most document search tools find keywords. Few find actionable intent.",
     whyThisExists: "Engineering specifications and construction contracts run hundreds of pages long. Standard search finds words, but fails to identify schedule conflicts, clause risks, or required action items. DocuLens turns static PDFs into grounded, decision-ready project summaries.",
     problemTitle: "Un-grounded LLMs invent facts when analyzing complex technical contracts.",
@@ -58,61 +61,81 @@ export default function ChapterEnterAI() {
       stage: "03. LLM Intelligence",
       title: "Gemini Completions API",
       desc: "Generates structured project summaries, schedule conflict checks, and human-in-the-loop action items.",
-      tech: "Gemini API / GPT-4",
+      tech: "Gemini Flash API",
     },
     {
-      stage: "04. Output Delivery",
-      title: "Interactive Action Console",
-      desc: "Delivers pixel-perfect glassmorphic report interfaces with verifiable source citations and unit test coverage.",
-      tech: "Tailwind v4 / Vitest",
+      stage: "04. Verified Output",
+      title: "Citation & Safety Engine",
+      desc: "Validates citations against original page offsets, ensuring zero hallucinated claims reach decision makers.",
+      tech: "Vitest / Guardrails",
     },
   ];
 
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <>
-      <section id="chapter-04" className="py-12 md:py-28 px-4 sm:px-6 pb-28 md:pb-28 max-w-6xl mx-auto border-t border-white/10 relative bg-[#030712] bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(147,51,234,0.12),rgba(3,7,18,1))] overflow-hidden scroll-mt-32">
-        {/* Ambient Neural Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-purple-600/15 via-pink-600/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
+      <section
+        ref={sectionRef}
+        id="chapter-04"
+        className="py-16 md:py-28 px-4 sm:px-6 pb-28 md:pb-28 max-w-6xl mx-auto border-t border-white/5 relative bg-[#030712] scroll-mt-32"
+      >
+        {/* Background Radial Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
 
         {/* Chapter Label */}
         <div className="flex justify-center mb-6 relative z-10">
-          <span className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-purple-500/15 border border-purple-400/30 text-[10px] sm:text-xs font-mono text-purple-300 uppercase tracking-wider sm:tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.2)] max-w-full text-center">
+          <span className="px-3.5 py-1.5 rounded-full bg-purple-500/15 border border-purple-400/40 text-xs font-mono text-purple-300 uppercase tracking-widest text-center">
             CHAPTER 04 — ENTER AI
           </span>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12 sm:mb-16 max-w-3xl mx-auto space-y-3 relative z-10"
-        >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
+        <div ref={headerRef} className="text-center mb-12 sm:mb-16 max-w-3xl mx-auto space-y-3 relative z-10">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
             DocuLens: AI Document Intelligence Engine
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base md:text-lg leading-relaxed">
+          <p className="text-slate-400 text-sm sm:text-base md:text-lg leading-relaxed font-light">
             Building grounded, schema-bounded AI agents to eliminate document hallucination in engineering specifications.
           </p>
-        </motion.div>
+        </div>
 
         {/* Full-Width Story Showcase */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-white/[0.02] border border-white/10 rounded-2xl md:rounded-3xl p-5 sm:p-8 md:p-12 mb-12 shadow-2xl space-y-6 relative z-10"
-        >
+        <div className="bg-[#09071c]/80 backdrop-blur-md border border-purple-500/30 rounded-2xl md:rounded-3xl p-5 sm:p-8 md:p-12 mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-6 relative z-10">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-400/40 text-xs font-mono text-purple-300">
               <Sparkles size={14} className="text-purple-400" />
               <span>DocuLens | Document-to-Action Assistant</span>
             </div>
 
-            <h3 className="text-2xl sm:text-4xl font-bold text-white leading-tight">
+            <h3 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
               Transforming complex project PDFs into verifiable engineering actions.
             </h3>
 
-            <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-4xl">
+            <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-4xl font-light">
               DocuLens analyzes long-form technical specification PDFs, detects schedule conflicts, and generates human-in-the-loop summaries using Next.js 16 (App Router), TypeScript, and Gemini API.
             </p>
           </div>
@@ -120,7 +143,10 @@ export default function ChapterEnterAI() {
           {/* Tech Badges */}
           <div className="flex flex-wrap gap-2 pt-2">
             {["Next.js 16", "React 19", "TypeScript", "Tailwind v4", "Prisma 7", "PostgreSQL", "Gemini API", "Vitest"].map((t) => (
-              <span key={t} className="px-3 py-1 bg-white/10 rounded-lg text-xs font-mono text-purple-300 border border-purple-400/30">
+              <span
+                key={t}
+                className="px-3 py-1 bg-white/5 rounded-lg text-xs font-mono text-purple-300 border border-purple-400/30 hover:border-purple-400 transition-colors"
+              >
                 {t}
               </span>
             ))}
@@ -132,20 +158,20 @@ export default function ChapterEnterAI() {
               <div
                 key={item.stage}
                 onClick={() => setActiveStage(idx)}
-                className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+                className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
                   activeStage === idx
-                    ? "bg-purple-500/15 border-purple-400/60 shadow-[0_0_25px_rgba(168,85,247,0.25)]"
-                    : "bg-white/[0.03] border-white/10 hover:border-white/25"
+                    ? "bg-purple-500/20 border-purple-400/70 shadow-[0_0_25px_rgba(168,85,247,0.25)] -translate-y-1"
+                    : "bg-white/[0.03] border-white/10 hover:border-white/25 hover:bg-white/[0.05]"
                 }`}
               >
-                <div className="flex justify-between items-center mb-1">
+                <div className="flex justify-between items-center mb-1.5">
                   <span className="text-[10px] font-mono text-purple-300 font-bold">{item.stage}</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-300">
                     {item.tech}
                   </span>
                 </div>
                 <h4 className="text-sm font-bold text-white mb-1">{item.title}</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
+                <p className="text-xs text-slate-400 leading-relaxed font-light">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -156,7 +182,7 @@ export default function ChapterEnterAI() {
               href="https://doculens-coral.vercel.app/"
               target="_blank"
               rel="noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-purple-500 text-white font-semibold text-xs hover:bg-purple-600 transition-all shadow-[0_0_25px_rgba(168,85,247,0.3)]"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-purple-500 text-white font-semibold text-xs hover:bg-purple-600 transition-all shadow-[0_0_25px_rgba(168,85,247,0.3)] hover:-translate-y-0.5"
             >
               <span>Live Application Demo</span>
               <ArrowUpRight size={16} />
@@ -164,21 +190,17 @@ export default function ChapterEnterAI() {
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-mono text-xs hover:bg-white/20 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-mono text-xs hover:bg-white/20 transition-all cursor-pointer group"
             >
               <BookOpen size={15} />
-              <span>Read Full Case Study →</span>
+              <span>Read Full Case Study</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* DOCULENS APP SHOWCASE FRAME */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-[#0b081c]/90 backdrop-blur-xl border border-purple-500/30 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(168,85,247,0.15)] mb-12 relative z-10"
-        >
+        <div className="bg-[#0b081c]/90 backdrop-blur-xl border border-purple-500/30 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(168,85,247,0.15)] mb-12 relative z-10 hover:border-purple-400/50 transition-colors duration-500">
           {/* Window Header */}
           <div className="px-6 py-4 bg-[#120c29]/90 border-b border-purple-500/20 flex flex-wrap justify-between items-center gap-4">
             <div className="flex items-center gap-3">
@@ -195,7 +217,7 @@ export default function ChapterEnterAI() {
             <div className="flex gap-2.5">
               <button
                 onClick={() => setShowHood(!showHood)}
-                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono transition-all border ${
+                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono transition-all border cursor-pointer ${
                   showHood
                     ? "bg-purple-500 text-white font-bold border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
                     : "bg-purple-500/20 border-purple-400/30 text-purple-200 hover:bg-purple-500/30"
@@ -205,7 +227,7 @@ export default function ChapterEnterAI() {
               </button>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-mono text-white hover:bg-white/20 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-mono text-white hover:bg-white/20 transition-all cursor-pointer"
               >
                 <BookOpen size={14} />
                 <span>Case Study</span>
@@ -249,12 +271,18 @@ export default function ChapterEnterAI() {
               </div>
             </div>
           ) : (
-            <div className="p-4 sm:p-8 bg-[#070412]/80 cursor-pointer" onClick={() => setIsModalOpen(true)}>
+            <div
+              className="p-4 sm:p-8 bg-[#070412]/80 cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+            >
               <div className="rounded-2xl overflow-hidden border border-purple-500/20 shadow-2xl group relative">
-                <img
+                <ImageReveal
                   src="/docuLens_cover.png"
                   alt="DocuLens Document Assistant Interface"
-                  className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-500"
+                  className="w-full h-auto"
+                  imgClassName="group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                  cursorText="CASE STUDY"
+                  parallaxAmount={-6}
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <span className="px-6 py-3 rounded-full bg-purple-500 text-white font-semibold text-xs flex items-center gap-2 shadow-2xl">
@@ -269,12 +297,15 @@ export default function ChapterEnterAI() {
           <div className="px-6 py-4 bg-[#0a0618]/90 border-t border-purple-500/20 flex flex-wrap items-center gap-3">
             <span className="text-xs font-mono text-purple-300 uppercase tracking-wider mr-2">TECH STACK:</span>
             {["Next.js 16", "React 19", "TypeScript", "Tailwind v4", "Prisma 7", "PostgreSQL", "Gemini API"].map((tech) => (
-              <span key={tech} className="px-3 py-1 bg-white/5 text-xs font-mono text-purple-300 rounded-lg border border-purple-500/20">
+              <span
+                key={tech}
+                className="px-3 py-1 bg-white/5 text-xs font-mono text-purple-300 rounded-lg border border-purple-500/20 hover:border-purple-400/40 transition-colors"
+              >
                 {tech}
               </span>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Case Study Modal */}

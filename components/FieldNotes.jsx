@@ -1,19 +1,66 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Compass, MapPin, Calendar, Terminal, ArrowUpRight, ArrowRight,
   Maximize2, X, ChevronLeft, ChevronRight, Sparkles, Layers,
   Cpu, CheckCircle2, ShieldCheck, Activity
 } from "lucide-react";
 import { fieldNotes, getFieldLogsStats } from "@/lib/field-notes";
+import ImageReveal from "./ImageReveal";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { useLenis } from "@/components/SmoothScrollProvider";
 
 export default function FieldNotes() {
   const [selectedNote, setSelectedNote] = useState(fieldNotes[0]);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const lenis = useLenis();
 
   const stats = getFieldLogsStats();
   const gallery = selectedNote?.gallery || [];
+
+  // Lock body scroll and Lenis when lightbox is active
+  useEffect(() => {
+    if (lightboxIndex !== null) {
+      document.body.style.overflow = "hidden";
+      if (lenis) lenis.stop();
+    } else {
+      document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
+    };
+  }, [lightboxIndex, lenis]);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   // Lightbox keyboard navigation
   useEffect(() => {
@@ -34,19 +81,21 @@ export default function FieldNotes() {
 
   return (
     <>
-      <section id="field-notes" className="py-12 md:py-28 px-4 sm:px-6 pb-28 md:pb-28 max-w-6xl mx-auto border-t border-white/10 relative bg-[#030712] scroll-mt-32">
+      <section
+        ref={sectionRef}
+        id="field-notes"
+        className="py-16 md:py-28 px-4 sm:px-6 pb-28 md:pb-28 max-w-6xl mx-auto border-t border-white/10 relative bg-[#030712] scroll-mt-32"
+      >
         {/* Section Header */}
         <div className="flex justify-center mb-6">
-          <span className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-[10px] sm:text-xs font-mono text-cyan-300 uppercase tracking-wider sm:tracking-widest flex items-center gap-2 max-w-full text-center">
+          <span className="px-3.5 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-xs font-mono text-cyan-300 uppercase tracking-widest flex items-center gap-2 max-w-full text-center">
             <Compass size={14} className="text-cyan-400 shrink-0" />
-            FIELD NOTES // PROFESSIONAL JOURNAL
+            <span>FIELD NOTES // PROFESSIONAL JOURNAL</span>
           </span>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+        <div
+          ref={headerRef}
           className="text-center mb-16 max-w-3xl mx-auto space-y-4"
         >
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
@@ -55,18 +104,13 @@ export default function FieldNotes() {
               BEHIND A SCREEN.
             </span>
           </h2>
-          <p className="text-slate-400 text-lg leading-relaxed font-sans">
+          <p className="text-slate-400 text-lg leading-relaxed font-light">
             "Places, conversations and experiences that became part of the engineering journey."
           </p>
-        </motion.div>
+        </div>
 
         {/* FIELD LOG HUD TERMINAL PANEL */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="p-5 rounded-2xl bg-[#080d1b] border border-cyan-500/30 mb-16 font-mono text-xs text-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(6,182,212,0.15)] flex flex-wrap justify-between items-center gap-4"
-        >
+        <div className="p-5 rounded-2xl bg-[#080d1b] border border-cyan-500/30 mb-16 font-mono text-xs text-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(6,182,212,0.15)] flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <Terminal size={16} className="text-cyan-400" />
             <span className="text-white font-bold tracking-wider">FIELD_LOG</span>
@@ -94,11 +138,11 @@ export default function FieldNotes() {
               <span>{stats.status}</span>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* TIMELINE & FIELD NOTE // 001 CONTAINER */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left Timeline Sidebar (Desktop & Tablet) */}
+          {/* Left Timeline Sidebar */}
           <div className="hidden lg:block lg:col-span-3 font-mono text-xs space-y-6 sticky top-28">
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
               <span className="text-slate-500 uppercase tracking-widest text-[10px] block border-b border-white/10 pb-2">
@@ -131,12 +175,7 @@ export default function FieldNotes() {
           {/* Main Field Note Story Content */}
           <div className="lg:col-span-9 space-y-16">
             {/* Entry Header Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-8 sm:p-12 rounded-3xl bg-[#090e1c] border border-cyan-500/30 space-y-6 shadow-2xl relative overflow-hidden"
-            >
+            <div className="p-8 sm:p-12 rounded-3xl bg-[#090e1c] border border-cyan-500/30 space-y-6 shadow-2xl relative overflow-hidden">
               <div className="flex flex-wrap justify-between items-center gap-4 font-mono text-xs">
                 <span className="px-3 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-bold">
                   FIELD NOTE // {selectedNote.number}
@@ -159,7 +198,7 @@ export default function FieldNotes() {
                 <h3 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
                   {selectedNote.title}
                 </h3>
-                <p className="text-slate-300 text-lg sm:text-xl font-sans leading-relaxed">
+                <p className="text-slate-300 text-lg sm:text-xl font-light leading-relaxed">
                   "{selectedNote.subtitle}"
                 </p>
               </div>
@@ -168,27 +207,22 @@ export default function FieldNotes() {
                 <span>ORG: {selectedNote.organization}</span>
                 <span>VENUE: {selectedNote.venue}</span>
               </div>
-            </motion.div>
+            </div>
 
             {/* SCENES NARRATIVE PROGRESSION */}
             <div className="space-y-16">
               {/* SCENE 01: ARRIVAL */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
-              >
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-6 space-y-4">
                   <span className="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider block">
                     SCENE 01 — ARRIVAL
                   </span>
-                  <h4 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  <h4 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
                     It started with a conference.
                   </h4>
-                  <div className="space-y-3 text-slate-300 text-base leading-relaxed font-sans">
+                  <div className="space-y-3 text-slate-300 text-base leading-relaxed font-light">
                     <p>
-                      As part of <strong className="text-white">IDG10 Engineering Solutions</strong>, I had the opportunity to attend ASME IMECE 2026 at the Chennai Trade Centre.
+                      As part of <strong className="text-white font-medium">IDG10 Engineering Solutions</strong>, I had the opportunity to attend ASME IMECE 2026 at the Chennai Trade Centre.
                     </p>
                     <p>
                       Walking into one of the largest international mechanical and systems engineering congresses, the atmosphere was immediately filled with technical intensity—engineers, researchers, and founders from over 100 countries converging in one place.
@@ -201,39 +235,40 @@ export default function FieldNotes() {
                   onClick={() => setLightboxIndex(0)}
                 >
                   <div className="rounded-2xl overflow-hidden border border-white/15 relative shadow-2xl aspect-[4/5] bg-slate-900">
-                    <img
+                    <ImageReveal
                       src={gallery[0]?.url || selectedNote.coverImage}
-                      alt={gallery[0]?.alt}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      alt={gallery[0]?.alt || "Conference photo"}
+                      className="w-full h-full"
+                      imgClassName="group-hover:scale-105 transition-transform duration-700 ease-out"
+                      cursorText="EXPAND"
+                      parallaxAmount={-6}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                    <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center text-[10px] font-mono text-cyan-300 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 pointer-events-none" />
+                    <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center text-[10px] font-mono text-cyan-300 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 pointer-events-none">
                       <span>{gallery[0]?.caption}</span>
                       <Maximize2 size={12} />
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* SCENE 02: REPRESENTING THE WORK */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
-              >
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                 <div
                   className="md:col-span-6 order-2 md:order-1 cursor-pointer group"
                   onClick={() => setLightboxIndex(2)}
                 >
                   <div className="rounded-2xl overflow-hidden border border-white/15 relative shadow-2xl aspect-[4/5] bg-slate-900">
-                    <img
+                    <ImageReveal
                       src={gallery[2]?.url || selectedNote.coverImage}
-                      alt={gallery[2]?.alt}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      alt={gallery[2]?.alt || "Exhibition Booth"}
+                      className="w-full h-full"
+                      imgClassName="group-hover:scale-105 transition-transform duration-700 ease-out"
+                      cursorText="EXPAND"
+                      parallaxAmount={-6}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                    <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center text-[10px] font-mono text-purple-300 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 pointer-events-none" />
+                    <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center text-[10px] font-mono text-purple-300 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 pointer-events-none">
                       <span>{gallery[2]?.caption}</span>
                       <Maximize2 size={12} />
                     </div>
@@ -244,32 +279,27 @@ export default function FieldNotes() {
                   <span className="text-xs font-mono text-purple-400 font-bold uppercase tracking-wider block">
                     SCENE 02 — REPRESENTING THE WORK
                   </span>
-                  <h4 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  <h4 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
                     Exhibiting subsea & physical engineering tools.
                   </h4>
-                  <div className="space-y-3 text-slate-300 text-base leading-relaxed font-sans">
+                  <div className="space-y-3 text-slate-300 text-base leading-relaxed font-light">
                     <p>
-                      At <strong className="text-white">Booth A16 (IDG10 Solutions Private Limited)</strong>, we showcased our engineering product suite—including SPDT and the interactive Subsea Field Configurator.
+                      At <strong className="text-white font-medium">Booth A16 (IDG10 Solutions Private Limited)</strong>, we showcased our engineering product suite—including SPDT and the interactive Subsea Field Configurator.
                     </p>
                     <p>
                       Demonstrating software designed for subsea pipeline stress calculations and vessel cost estimation to practicing offshore engineers reinforced a key lesson: software isn't just about clean code; it's about solving real-world physical constraints accurately.
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* SCENE 03 & 04: THE FLOOR & INTERACTIVE IDEAS CONVERGENCE */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="bg-[#080d1b] border border-white/10 rounded-3xl p-8 sm:p-12 space-y-8 shadow-2xl"
-              >
+              <div className="bg-[#080d1b] border border-white/10 rounded-3xl p-8 sm:p-12 space-y-8 shadow-2xl">
                 <div className="space-y-2">
                   <span className="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider block">
                     SCENE 04 — THE IDEAS & CONVERGENCE
                   </span>
-                  <h4 className="text-2xl sm:text-4xl font-bold text-white leading-tight">
+                  <h4 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
                     Hardware, Software, and AI Are Converging.
                   </h4>
                 </div>
@@ -293,30 +323,28 @@ export default function FieldNotes() {
                 {/* 5 Themes Progressive Reveal Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
                   {selectedNote.ideas.map((idea, idx) => (
-                    <div key={idea.title} className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
+                    <div
+                      key={idea.title}
+                      className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2 hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300"
+                    >
                       <span className="text-[10px] font-mono text-emerald-400 font-bold block">0{idx + 1}. THEME</span>
                       <div className="font-bold text-white text-sm">{idea.title}</div>
-                      <p className="text-xs text-slate-400 font-sans leading-relaxed">{idea.desc}</p>
+                      <p className="text-xs text-slate-400 font-light leading-relaxed">{idea.desc}</p>
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
 
               {/* SCENE 05 & 06: PEOPLE & NETWORKING */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
-              >
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-6 space-y-4">
                   <span className="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider block">
                     SCENE 06 — THE PEOPLE
                   </span>
-                  <h4 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  <h4 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
                     20 minutes can change your perspective.
                   </h4>
-                  <div className="space-y-3 text-slate-300 text-base leading-relaxed font-sans">
+                  <div className="space-y-3 text-slate-300 text-base leading-relaxed font-light">
                     <p>
                       Some of the most valuable insights came not from slides, but from 20-minute conversations at exhibition booths and hallway discussions.
                     </p>
@@ -331,35 +359,33 @@ export default function FieldNotes() {
                   onClick={() => setLightboxIndex(3)}
                 >
                   <div className="rounded-2xl overflow-hidden border border-white/15 relative shadow-2xl aspect-[16/10] bg-slate-900">
-                    <img
+                    <ImageReveal
                       src={gallery[3]?.url || selectedNote.coverImage}
-                      alt={gallery[3]?.alt}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      alt={gallery[3]?.alt || "Discussion"}
+                      className="w-full h-full"
+                      imgClassName="group-hover:scale-105 transition-transform duration-700 ease-out"
+                      cursorText="EXPAND"
+                      parallaxAmount={-6}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                    <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center text-[10px] font-mono text-cyan-300 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 pointer-events-none" />
+                    <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center text-[10px] font-mono text-cyan-300 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 pointer-events-none">
                       <span>{gallery[3]?.caption}</span>
                       <Maximize2 size={12} />
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* SCENE 07: TAKEAWAYS & WHAT I BROUGHT BACK */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="bg-[#090e1c] border border-cyan-500/30 rounded-3xl p-8 sm:p-12 space-y-8 shadow-2xl"
-              >
+              <div className="bg-[#090e1c] border border-cyan-500/30 rounded-3xl p-8 sm:p-12 space-y-8 shadow-2xl">
                 <div className="space-y-2">
                   <span className="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider block">
                     SCENE 07 — WHAT I BROUGHT BACK
                   </span>
-                  <h4 className="text-2xl sm:text-4xl font-bold text-white leading-tight">
+                  <h4 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
                     {selectedNote.conclusionHeadline}
                   </h4>
-                  <p className="text-slate-300 text-base sm:text-lg font-sans">
+                  <p className="text-slate-300 text-base sm:text-lg font-light">
                     {selectedNote.conclusionText}
                   </p>
                 </div>
@@ -367,22 +393,20 @@ export default function FieldNotes() {
                 {/* Takeaways Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-mono text-xs">
                   {selectedNote.takeaways.map((t) => (
-                    <div key={t.num} className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
+                    <div
+                      key={t.num}
+                      className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2 hover:border-cyan-400/40 hover:-translate-y-1 transition-all duration-300"
+                    >
                       <span className="text-cyan-400 font-bold text-sm">{t.num}</span>
                       <div className="font-bold text-white font-sans text-sm">{t.title}</div>
-                      <p className="text-slate-400 font-sans text-xs leading-relaxed">{t.desc}</p>
+                      <p className="text-slate-400 font-sans text-xs leading-relaxed font-light">{t.desc}</p>
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
 
               {/* CONNECT FIELD NOTES TO PORTFOLIO ARCHITECTURE */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-purple-950/30 to-slate-950 border border-white/15 space-y-6 shadow-2xl text-center"
-              >
+              <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-purple-950/30 to-slate-950 border border-white/15 space-y-6 shadow-2xl text-center">
                 <div className="flex justify-center">
                   <Sparkles className="text-cyan-400 w-8 h-8 animate-pulse" />
                 </div>
@@ -400,7 +424,7 @@ export default function FieldNotes() {
                 <div className="pt-2 flex flex-wrap justify-center gap-4 font-mono text-xs">
                   <a
                     href="#work"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500/20 border border-cyan-400/50 text-cyan-200 hover:bg-cyan-500/30 transition-all font-semibold"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500/20 border border-cyan-400/50 text-cyan-200 hover:bg-cyan-500/30 transition-all font-semibold hover:-translate-y-0.5"
                   >
                     <span>[ EXPLORE MY ENGINEERING WORK ]</span>
                     <ArrowRight size={14} />
@@ -408,7 +432,7 @@ export default function FieldNotes() {
 
                   <a
                     href="#chapter-04"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-500/20 border border-purple-400/50 text-purple-200 hover:bg-purple-500/30 transition-all font-semibold"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-500/20 border border-purple-400/50 text-purple-200 hover:bg-purple-500/30 transition-all font-semibold hover:-translate-y-0.5"
                   >
                     <span>[ EXPLORE MY AI WORK ]</span>
                     <ArrowRight size={14} />
@@ -416,13 +440,13 @@ export default function FieldNotes() {
 
                   <a
                     href="#lab"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all font-semibold"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all font-semibold hover:-translate-y-0.5"
                   >
                     <span>[ SEE THE LAB ]</span>
                     <ArrowRight size={14} />
                   </a>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>
@@ -431,11 +455,11 @@ export default function FieldNotes() {
       {/* ACCESSIBLE LIGHTBOX MODAL */}
       <AnimatePresence>
         {lightboxIndex !== null && gallery[lightboxIndex] && (
-          <div className="fixed inset-0 z-[100080] flex items-center justify-center p-4 sm:p-8 bg-black/95 backdrop-blur-2xl">
+          <div data-lenis-prevent className="fixed inset-0 z-[100080] flex items-center justify-center p-4 sm:p-8 bg-black/95 backdrop-blur-2xl overscroll-contain">
             {/* Close Button */}
             <button
               onClick={() => setLightboxIndex(null)}
-              className="absolute top-6 right-6 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-20"
+              className="absolute top-6 right-6 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-20 cursor-pointer"
               aria-label="Close image lightbox"
             >
               <X size={24} />
@@ -444,7 +468,7 @@ export default function FieldNotes() {
             {/* Next / Previous Controls */}
             <button
               onClick={() => setLightboxIndex((prev) => (prev === 0 ? gallery.length - 1 : prev - 1))}
-              className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-20"
+              className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-20 cursor-pointer"
               aria-label="Previous image"
             >
               <ChevronLeft size={28} />
@@ -452,7 +476,7 @@ export default function FieldNotes() {
 
             <button
               onClick={() => setLightboxIndex((prev) => (prev === gallery.length - 1 ? 0 : prev + 1))}
-              className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-20"
+              className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-20 cursor-pointer"
               aria-label="Next image"
             >
               <ChevronRight size={28} />

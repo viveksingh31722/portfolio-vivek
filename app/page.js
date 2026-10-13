@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
-import Navbar from "@/components/Navbar";
+import { useQuickView } from "@/lib/QuickViewContext";
 import SystemBoot from "@/components/SystemBoot";
+import WorkShowcaseStrip from "@/components/WorkShowcaseStrip";
 import Hero from "@/components/Hero";
 import ChooseMission from "@/components/ChooseMission";
 import ChapterStarted from "@/components/ChapterStarted";
@@ -20,20 +20,16 @@ import CareerTrajectory from "@/components/CareerTrajectory";
 import PostCreditContact from "@/components/PostCreditContact";
 import Blogs from "@/components/Blogs";
 import Footer from "@/components/Footer";
-import QuickViewModal from "@/components/QuickViewModal";
 import PortfolioAIGuide from "@/components/PortfolioAIGuide";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function Home() {
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const { openQuickView } = useQuickView();
 
   return (
     <main className="min-h-screen text-foreground font-sans selection:bg-cyan-500/30 bg-[#030712] relative pb-16 md:pb-0">
-      {/* PERSISTENT SYSTEM NAVIGATION HEADER */}
-      <Navbar onOpenQuickView={() => setIsQuickViewOpen(true)} />
-
       {/* CHAPTER 00: HERO SHOWCASE (TOP LANDING) */}
-      <Hero onOpenQuickView={() => setIsQuickViewOpen(true)} />
+      <Hero onOpenQuickView={openQuickView} />
 
       {/* SYSTEM INITIALIZATION TERMINAL SEQUENCE */}
       <SystemBoot
@@ -46,6 +42,9 @@ export default function Home() {
           if (el) el.scrollIntoView({ behavior: "smooth" });
         }}
       />
+
+      {/* AMBIENT REPERTOIRE STRIP SHOWCASE */}
+      <WorkShowcaseStrip />
 
       {/* CHAPTER 01: CHOOSE YOUR MISSION */}
       <ChooseMission />
@@ -96,17 +95,11 @@ export default function Home() {
       {/* FOOTER */}
       <Footer />
 
-      {/* RECRUITER FAST-TRACK QUICK VIEW MODAL */}
-      <QuickViewModal
-        isOpen={isQuickViewOpen}
-        onClose={() => setIsQuickViewOpen(false)}
-      />
-
       {/* GROUNDED PORTFOLIO AI GUIDE WIDGET */}
       <PortfolioAIGuide />
 
       {/* MOBILE APP BOTTOM NAVIGATION SYSTEM */}
-      <MobileBottomNav onOpenQuickView={() => setIsQuickViewOpen(true)} />
+      <MobileBottomNav onOpenQuickView={openQuickView} />
     </main>
   );
 }

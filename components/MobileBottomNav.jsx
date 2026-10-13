@@ -5,8 +5,14 @@ import {
   Home, Briefcase, Compass, BookOpen, Menu, X, Download, Mail,
   Sparkles, Layers, Cpu, Code2, ArrowRight, Globe
 } from "lucide-react";
+import { useQuickView } from "@/lib/QuickViewContext";
+import { useLenis } from "@/components/SmoothScrollProvider";
 
-export default function MobileBottomNav({ onOpenQuickView }) {
+export default function MobileBottomNav({ onOpenQuickView: propOnOpenQuickView }) {
+  const { openQuickView: contextOpenQuickView } = useQuickView();
+  const handleOpenQuickView = propOnOpenQuickView || contextOpenQuickView;
+  const lenis = useLenis();
+
   const [activeTab, setActiveTab] = useState("home");
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
@@ -33,6 +39,17 @@ export default function MobileBottomNav({ onOpenQuickView }) {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Lock body scroll and Lenis when bottom sheet is open
+  useEffect(() => {
+    if (isMoreOpen) {
+      document.body.style.overflow = "hidden";
+      if (lenis) lenis.stop();
+    } else {
+      document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
+    }
+  }, [isMoreOpen, lenis]);
 
   const navItems = [
     { id: "home", label: "Home", href: "#chapter-00", icon: Home },
@@ -66,7 +83,7 @@ export default function MobileBottomNav({ onOpenQuickView }) {
                   }`}
                   aria-label="Open More Options Menu"
                 >
-                  <Icon size={20} className={isMoreOpen ? "text-cyan-400" : "text-slate-400"} />
+                  <Icon size={19} className={isMoreOpen ? "text-cyan-400" : "text-slate-400"} />
                   <span className="text-[10px] font-mono tracking-tight mt-0.5">{item.label}</span>
                 </button>
               );
@@ -86,7 +103,7 @@ export default function MobileBottomNav({ onOpenQuickView }) {
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                <Icon size={20} className={isActive ? "text-cyan-400" : "text-slate-400"} />
+                <Icon size={19} className={isActive ? "text-cyan-400" : "text-slate-400"} />
                 <span className="text-[10px] font-mono tracking-tight mt-0.5 font-medium">
                   {item.label}
                 </span>
@@ -106,7 +123,7 @@ export default function MobileBottomNav({ onOpenQuickView }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMoreOpen(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
             />
 
             {/* Bottom Sheet Card */}
@@ -128,7 +145,8 @@ export default function MobileBottomNav({ onOpenQuickView }) {
                 </div>
                 <button
                   onClick={() => setIsMoreOpen(false)}
-                  className="p-2 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white"
+                  className="p-2 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white cursor-pointer"
+                  aria-label="Close menu"
                 >
                   <X size={20} />
                 </button>
@@ -138,9 +156,9 @@ export default function MobileBottomNav({ onOpenQuickView }) {
               <button
                 onClick={() => {
                   setIsMoreOpen(false);
-                  if (onOpenQuickView) onOpenQuickView();
+                  if (handleOpenQuickView) handleOpenQuickView();
                 }}
-                className="w-full flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/10 border border-cyan-400/50 text-white font-mono text-xs font-bold shadow-[0_0_20px_rgba(6,182,212,0.25)]"
+                className="w-full flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/10 border border-cyan-400/50 text-white font-mono text-xs font-bold shadow-[0_0_20px_rgba(6,182,212,0.25)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
                   <Sparkles size={16} className="text-cyan-400 animate-pulse" />

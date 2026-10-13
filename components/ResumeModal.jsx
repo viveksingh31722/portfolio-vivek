@@ -2,24 +2,40 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, Upload } from "lucide-react";
+import { useLenis } from "@/components/SmoothScrollProvider";
 
 export default function ResumeModal({ isOpen, onClose }) {
-  // Prevent scrolling on the background when modal is open
+  const lenis = useLenis();
+
+  // Prevent scrolling on the background and stop Lenis when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      if (lenis) lenis.stop();
     } else {
       document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
     }
     return () => {
       document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
     };
-  }, [isOpen]);
+  }, [isOpen, lenis]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 md:p-12">
+        <div data-lenis-prevent className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 md:p-12 overscroll-contain">
           {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }}

@@ -2,15 +2,18 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, ShieldCheck, Zap, Layers, Sparkles, ChevronDown } from "lucide-react";
+import { useLenis } from "@/components/SmoothScrollProvider";
 
 export default function CaseStudyModal({ isOpen, onClose, project }) {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
   const contentRef = useRef(null);
+  const lenis = useLenis();
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      if (lenis) lenis.stop();
       setShowScrollHint(true);
       setScrollProgress(0);
       if (contentRef.current) {
@@ -18,11 +21,23 @@ export default function CaseStudyModal({ isOpen, onClose, project }) {
       }
     } else {
       document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
     }
     return () => {
       document.body.style.overflow = "auto";
+      if (lenis) lenis.start();
     };
-  }, [isOpen, project]);
+  }, [isOpen, project, lenis]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -49,7 +64,7 @@ export default function CaseStudyModal({ isOpen, onClose, project }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 md:p-10 overflow-y-auto">
+        <div data-lenis-prevent className="fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 md:p-10 overflow-y-auto overscroll-contain">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -65,7 +80,7 @@ export default function CaseStudyModal({ isOpen, onClose, project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-            className="relative w-full max-w-4xl bg-[#080d1a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col z-10"
+            className="relative w-full max-w-4xl bg-[#080d1a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col z-10 overscroll-contain"
           >
             {/* Modal Header */}
             <div className="sticky top-0 bg-[#080d1a]/95 backdrop-blur-md px-6 sm:px-10 py-5 border-b border-white/10 flex justify-between items-center z-20">
@@ -97,8 +112,9 @@ export default function CaseStudyModal({ isOpen, onClose, project }) {
             {/* Modal Scrollable Body */}
             <div
               ref={contentRef}
+              data-lenis-prevent
               onScroll={handleScroll}
-              className="p-6 sm:p-10 overflow-y-auto max-h-[calc(90vh-75px)] space-y-12 text-slate-300"
+              className="p-6 sm:p-10 overflow-y-auto max-h-[calc(90vh-75px)] space-y-12 text-slate-300 overscroll-contain"
             >
               {/* Title & Metadata Header */}
               <div className="space-y-6 border-b border-white/10 pb-8">

@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowUpRight, ChevronDown, ChevronUp, BookOpen, Layers } from "lucide-react";
 import CaseStudyModal from "./CaseStudyModal";
+import ImageReveal from "./ImageReveal";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
 const projectsData = [
   {
@@ -141,137 +142,203 @@ const projectsData = [
 export default function Projects() {
   const [showAll, setShowAll] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const sectionRef = useRef(null);
+  const gridRef = useRef(null);
+  const headerRef = useRef(null);
 
   const visibleProjects = showAll ? projectsData : projectsData.slice(0, 3);
 
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Header entrance animation
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // Staggered cards entrance
+      if (gridRef.current) {
+        const cards = gridRef.current.querySelectorAll(".project-card");
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.85,
+            stagger: 0.14,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: gridRef.current,
+              start: "top 80%",
+              once: true,
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [showAll]);
+
   return (
     <>
-      <section id="projects" className="py-12 md:py-24 px-4 sm:px-6 pb-28 md:pb-24 max-w-7xl mx-auto border-t border-white/5 bg-[#030712] scroll-mt-32">
-        <motion.div 
-          className="text-center mb-10 sm:mb-16 space-y-2"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-            Featured <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Projects</span>
+      <section
+        ref={sectionRef}
+        id="projects"
+        className="py-16 md:py-28 px-4 sm:px-6 pb-28 md:pb-28 max-w-7xl mx-auto border-t border-white/5 bg-[#030712] scroll-mt-32"
+      >
+        <div ref={headerRef} className="text-center mb-12 sm:mb-16 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-xs font-mono text-cyan-300">
+            <Layers size={13} className="text-cyan-400" />
+            <span>CASE STUDIES & PRODUCTION WORK</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+            Featured{" "}
+            <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
+              Projects
+            </span>
           </h2>
           <p className="text-slate-400 text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Deep-dive case studies detailing technical architecture, engineering constraints, and results.
+            Deep-dive case studies detailing technical architecture, engineering constraints, and measured outcomes.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
-          <AnimatePresence mode="popLayout">
-            {visibleProjects.map((project, idx) => (
-              <motion.div 
-                key={project.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="flex flex-col bg-white/[0.03] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden hover:border-cyan-500/50 transition-all group h-full shadow-2xl"
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch"
+        >
+          {visibleProjects.map((project) => (
+            <div
+              key={project.id}
+              className="project-card flex flex-col bg-white/[0.03] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden hover:border-cyan-400/50 transition-all duration-500 group h-full shadow-[0_15px_35px_rgba(0,0,0,0.6)] hover:shadow-[0_20px_45px_rgba(6,182,212,0.15)] hover:-translate-y-1.5"
+            >
+              {/* Project Image Banner with Clip-Path Reveal & Parallax */}
+              <div
+                className="relative h-48 sm:h-56 overflow-hidden cursor-pointer bg-slate-950"
+                onClick={() => setSelectedProject(project)}
               >
-                {/* Project Image Banner */}
-                <div 
-                  className="relative h-44 sm:h-56 overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedProject(project)}
+                <ImageReveal
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full"
+                  imgClassName="group-hover:scale-105 transition-transform duration-700 ease-out"
+                  cursorText="CASE STUDY"
+                  parallaxAmount={-6}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent opacity-80 pointer-events-none" />
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedProject(project);
+                  }}
+                  className="absolute bottom-4 right-4 p-3 bg-cyan-500 text-black rounded-full opacity-90 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 shadow-lg hover:scale-110 cursor-pointer"
+                  title="Read Case Study"
                 >
-                  <img 
-                    src={project.image} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#030712] to-transparent opacity-70" />
-                  
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedProject(project);
-                    }}
-                    className="absolute bottom-4 right-4 p-3 bg-cyan-500 text-black rounded-full opacity-90 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 shadow-lg hover:scale-110"
-                    title="Read Case Study"
+                  <BookOpen size={16} />
+                </button>
+              </div>
+
+              {/* Card Content */}
+              <div className="p-7 flex flex-col flex-grow justify-between space-y-6">
+                <div>
+                  <div className="text-[11px] font-mono text-cyan-400 uppercase tracking-wider mb-2">
+                    {project.category}
+                  </div>
+                  <h3
+                    onClick={() => setSelectedProject(project)}
+                    className="text-xl font-bold mb-3 text-white group-hover:text-cyan-300 transition-colors cursor-pointer leading-snug"
                   >
-                    <BookOpen size={18} />
-                  </button>
+                    {project.title}
+                  </h3>
+                  <p className="text-slate-400 text-sm line-clamp-3 leading-relaxed font-light">
+                    {project.desc}
+                  </p>
                 </div>
-                
-                {/* Card Content */}
-                <div className="p-8 flex flex-col flex-grow justify-between">
-                  <div>
-                    <h3 
-                      onClick={() => setSelectedProject(project)}
-                      className="text-xl font-bold mb-3 text-white group-hover:text-cyan-400 transition-colors cursor-pointer"
-                    >
-                      {project.title}
-                    </h3>
-                    <p className="text-slate-400 text-sm mb-6 line-clamp-3 leading-relaxed">
-                      {project.desc}
-                    </p>
-                  </div>
 
-                  <div>
-                    {/* Tech Badges */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {project.tags.slice(0, 4).map(tag => (
-                        <span key={tag} className="text-[10px] font-mono tracking-wider uppercase px-2.5 py-1 bg-white/5 text-slate-300 rounded-lg border border-white/5">
-                          {tag}
-                        </span>
-                      ))}
-                      {project.tags.length > 4 && (
-                        <span className="text-[10px] font-mono text-cyan-400 px-2 py-1 bg-cyan-500/10 rounded-lg">
-                          +{project.tags.length - 4}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Case Study & Link Actions */}
-                    <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                      <button
-                        onClick={() => setSelectedProject(project)}
-                        className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 font-semibold"
+                <div>
+                  {/* Tech Badges */}
+                  <div className="flex flex-wrap gap-1.5 mb-5">
+                    {project.tags.slice(0, 4).map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] font-mono tracking-wider uppercase px-2.5 py-1 bg-white/5 text-slate-300 rounded-lg border border-white/5 hover:border-cyan-400/30 transition-colors"
                       >
-                        <BookOpen size={14} />
-                        <span>Read Case Study →</span>
-                      </button>
+                        {tag}
+                      </span>
+                    ))}
+                    {project.tags.length > 4 && (
+                      <span className="text-[10px] font-mono text-cyan-400 px-2 py-1 bg-cyan-500/10 rounded-lg">
+                        +{project.tags.length - 4}
+                      </span>
+                    )}
+                  </div>
 
-                      {project.link && (
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-slate-400 hover:text-white transition-colors"
-                          title="Open Link"
-                        >
-                          <ArrowUpRight size={18} />
-                        </a>
-                      )}
-                    </div>
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                    <button
+                      onClick={() => setSelectedProject(project)}
+                      className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 font-semibold group/btn cursor-pointer"
+                    >
+                      <BookOpen size={13} />
+                      <span>Read Case Study</span>
+                      <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
+                    </button>
+
+                    {project.link && (
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 text-slate-400 hover:text-white transition-colors hover:scale-110 active:scale-95"
+                        title="Open Link"
+                      >
+                        <ArrowUpRight size={17} />
+                      </a>
+                    )}
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              </div>
+            </div>
+          ))}
         </div>
 
         {projectsData.length > 3 && (
-          <motion.div 
-            className="mt-16 flex justify-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-          >
-            <button 
+          <div className="mt-14 flex justify-center">
+            <button
               onClick={() => setShowAll(!showAll)}
-              className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all active:scale-95 text-sm"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-white font-mono text-xs font-bold hover:bg-white/10 hover:border-cyan-400/40 transition-all active:scale-95 cursor-pointer shadow-lg"
             >
               {showAll ? (
-                <>Show Less <ChevronUp size={20} className="text-cyan-400" /></>
+                <>
+                  <span>SHOW LESS</span>
+                  <ChevronUp size={16} className="text-cyan-400" />
+                </>
               ) : (
-                <>View All Projects <ChevronDown size={20} className="text-purple-400" /></>
+                <>
+                  <span>VIEW ALL PROJECTS</span>
+                  <ChevronDown size={16} className="text-purple-400" />
+                </>
               )}
             </button>
-          </motion.div>
+          </div>
         )}
       </section>
 
